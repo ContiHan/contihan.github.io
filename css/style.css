@@ -35,6 +35,7 @@ header p {
 
 main {
     text-align: center;
+    padding-bottom: 100px;
 }
 
 section.about, section.interests {
@@ -77,9 +78,6 @@ footer {
     color: #fff;
     text-align: center;
     padding: 10px;
-    position: fixed;
-    bottom: 0;
-    left: 0; /* Ujistěte se, že patička začíná správně zleva */
     width: 100%;
 }
 
