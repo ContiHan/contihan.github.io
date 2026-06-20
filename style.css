@@ -86,6 +86,9 @@ ul {
     margin-bottom: 3rem;
     position: relative;
     display: inline-block;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .section-title::after {
@@ -155,10 +158,9 @@ ul {
 }
 
 .logo {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 2px;
+    font-family: var(--font-main);
+    font-size: 1.1rem;
+    font-weight: 500;
 }
 
 .logo-link {
@@ -172,14 +174,10 @@ ul {
     text-shadow: 0 0 10px var(--accent-glow);
 }
 
-.logo .tilde {
-    color: var(--text-secondary);
-    margin-right: 8px;
-}
-
-.logo .bracket {
-    color: var(--accent-color);
-}
+.logo .user { color: #00ff00; }
+.logo .colon { color: var(--text-primary); }
+.logo .tilde { color: #3b82f6; }
+.logo .prompt { color: var(--text-primary); }
 
 .logo .cursor {
     animation: blink 1s infinite;
