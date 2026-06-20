@@ -158,9 +158,10 @@ ul {
 }
 
 .logo {
-    font-family: var(--font-main);
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
 }
 
 .logo-link {
@@ -174,10 +175,10 @@ ul {
     text-shadow: 0 0 10px var(--accent-glow);
 }
 
-.logo .user { color: #00ff00; }
-.logo .colon { color: var(--text-primary); }
-.logo .tilde { color: #3b82f6; }
-.logo .prompt { color: var(--text-primary); }
+.logo .user { color: inherit; }
+.logo .colon { color: inherit; }
+.logo .tilde { color: var(--accent-color); }
+.logo .prompt { color: inherit; }
 
 .logo .cursor {
     animation: blink 1s infinite;
