@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             typewriterElement.textContent = currentText.substring(0, charIndex + 1);
             charIndex++;
-            typingSpeed = 100;
+            typingSpeed = Math.floor(Math.random() * 110) + 40; // Random delay 40-150ms
         }
 
         if (!isDeleting && charIndex === currentText.length) {
