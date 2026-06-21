@@ -893,9 +893,14 @@ footer {
 
 .github-stats {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
     font-size: 0.85rem;
     color: var(--text-primary);
+    flex-wrap: wrap;
+}
+
+.github-stats span {
+    white-space: nowrap;
 }
 
 .github-stats i {

@@ -153,7 +153,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const updatedDate = new Date(repo.pushed_at || repo.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                 const desc = repo.description || 'System module encrypted. No public description available.';
                 
+                const sizeInKb = repo.size;
+                const sizeText = sizeInKb > 1024 ? (sizeInKb / 1024).toFixed(1) + ' MB' : sizeInKb + ' KB';
+                
                 let statsHtml = `<span><i class="fas fa-clock"></i> ${updatedDate}</span>`;
+                statsHtml += `<span><i class="fas fa-hdd"></i> ${sizeText}</span>`;
                 if (repo.language) statsHtml += `<span><i class="fas fa-code"></i> ${repo.language}</span>`;
                 if (repo.stargazers_count > 0) statsHtml += `<span><i class="fas fa-star"></i> ${repo.stargazers_count}</span>`;
                 if (repo.forks_count > 0) statsHtml += `<span><i class="fas fa-code-branch"></i> ${repo.forks_count}</span>`;
