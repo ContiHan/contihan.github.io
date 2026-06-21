@@ -134,4 +134,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 6. Fetch GitHub Repos ---
+    const fetchGithubRepos = async () => {
+        const reposContainer = document.getElementById('github-repos');
+        if (!reposContainer) return;
+
+        try {
+            const response = await fetch('https://api.github.com/users/ContiHan/repos?sort=updated&per_page=3');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const repos = await response.json();
+            
+            reposContainer.innerHTML = ''; // clear loader
+            
+            repos.forEach(repo => {
+                const card = document.createElement('div');
+                card.className = 'github-card';
+                card.innerHTML = `
+                    <h4><a href="${repo.html_url}" target="_blank">${repo.name}</a></h4>
+                    <p>${repo.description || 'No description available.'}</p>
+                    <div class="github-stats">
+                        ${repo.language ? `<span><i class="fas fa-code"></i> ${repo.language}</span>` : ''}
+                        <span><i class="fas fa-star"></i> ${repo.stargazers_count}</span>
+                        <span><i class="fas fa-code-branch"></i> ${repo.forks_count}</span>
+                    </div>
+                `;
+                reposContainer.appendChild(card);
+            });
+        } catch (error) {
+            console.error('Error fetching repos:', error);
+            reposContainer.innerHTML = '<p>Failed to load GitHub transmissions.</p>';
+        }
+    };
+    
+    fetchGithubRepos();
+
 });
