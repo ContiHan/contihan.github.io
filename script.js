@@ -140,6 +140,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Mobile Easter Egg: Tap profile picture 5 times fast
+    const profilePic = document.querySelector('.pixel-profile');
+    let tapCount = 0;
+    let tapTimeout;
+    
+    if (profilePic) {
+        profilePic.addEventListener('click', () => {
+            tapCount++;
+            clearTimeout(tapTimeout);
+            
+            if (tapCount >= 5) {
+                activateMatrix();
+                tapCount = 0;
+            } else {
+                tapTimeout = setTimeout(() => { tapCount = 0; }, 1000); // reset if 1 second passes without tap
+            }
+        });
+    }
+
     function activateMatrix() {
         if (document.getElementById('matrix-canvas')) return;
         
