@@ -968,6 +968,12 @@ footer {
    Responsive
 ========================================= */
 @media (max-width: 992px) {
+    .hero {
+        height: auto;
+        min-height: 100vh;
+        padding: 120px 0 80px;
+    }
+
     .about-content {
         grid-template-columns: 1fr;
     }
@@ -981,6 +987,10 @@ footer {
     .hero-image-wrapper {
         justify-content: center;
         margin-bottom: 2rem;
+    }
+
+    .pixel-profile {
+        max-width: 200px;
     }
 
     .hero-actions {

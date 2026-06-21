@@ -146,18 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             reposContainer.innerHTML = ''; // clear loader
             
-            const customDescriptions = {
-                'SmartHallwayLights': 'Smart home lighting. Roadmap: LittleFS, ESPAsyncWebServer, WebSockets, OOP, non-blocking PWM, MQTT & Captive Portal.',
-                'contihan.github.io': 'Personal portfolio source code. Built with Vanilla HTML/CSS/JS. Features dark/light mode and GitHub API integration.',
-                'Statistika': 'Jupyter Notebooks for statistical analysis, predictive models, and data science experiments.',
-            };
-            
             repos.forEach(repo => {
                 const card = document.createElement('div');
                 card.className = 'github-card';
                 
                 const updatedDate = new Date(repo.pushed_at || repo.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-                const desc = repo.description || customDescriptions[repo.name] || 'System module encrypted. No public description available.';
+                const desc = repo.description || '[UNKNOWN]';
                 
                 const sizeInKb = repo.size;
                 const sizeText = sizeInKb > 1024 ? (sizeInKb / 1024).toFixed(1) + ' MB' : sizeInKb + ' KB';
