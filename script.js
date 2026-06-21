@@ -110,7 +110,90 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 4. Update Footer Year ---
+    // --- 4. Skills Progress Animation ---
+    const progressBars = document.querySelectorAll('.progress');
+    const progressObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const bar = entry.target;
+                bar.style.width = bar.getAttribute('data-width');
+                observer.unobserve(bar);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    progressBars.forEach(bar => progressObserver.observe(bar));
+
+    // --- 5. Easter Egg (Hack / Konami Code) ---
+    let hackSequence = ['h', 'a', 'c', 'k'];
+    let hackIndex = 0;
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === hackSequence[hackIndex]) {
+            hackIndex++;
+            if (hackIndex === hackSequence.length) {
+                activateMatrix();
+                hackIndex = 0;
+            }
+        } else {
+            hackIndex = (e.key.toLowerCase() === 'h') ? 1 : 0;
+        }
+    });
+
+    function activateMatrix() {
+        if (document.getElementById('matrix-canvas')) return;
+        
+        const canvas = document.createElement('canvas');
+        canvas.id = 'matrix-canvas';
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.style.zIndex = '9999';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.opacity = '0.8';
+        document.body.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=<>?';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+        for (let x = 0; x < columns; x++) drops[x] = 1;
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        const interval = setInterval(draw, 33);
+        
+        setTimeout(() => {
+            clearInterval(interval);
+            canvas.style.transition = 'opacity 2s';
+            canvas.style.opacity = '0';
+            setTimeout(() => canvas.remove(), 2000);
+        }, 8000);
+    }
+
+    // --- 6. Update Footer Year ---
     document.getElementById('year').textContent = new Date().getFullYear();
 
     // --- 5. Mobile Menu ---
