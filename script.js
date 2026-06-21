@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. Typewriter Effect ---
     const typewriterElement = document.getElementById('typewriter');
     const texts = [
-        "Analyzing data and statistics...",
+        "Analyzing data via statistics...",
         "Searching for security vulnerabilities...",
         "Executing performance tests...",
         "May the Force be with you."
@@ -23,7 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             typewriterElement.textContent = currentText.substring(0, charIndex + 1);
             charIndex++;
-            typingSpeed = Math.floor(Math.random() * 110) + 40; // Random delay 40-150ms
+            // Random delay 30-100ms
+            typingSpeed = Math.floor(Math.random() * 70) + 30;
+            // 10% chance to pause longer (simulate human hesitation or harder keypress)
+            if (Math.random() < 0.1) {
+                typingSpeed += Math.floor(Math.random() * 250) + 100;
+            }
         }
 
         if (!isDeleting && charIndex === currentText.length) {

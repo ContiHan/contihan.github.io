@@ -370,7 +370,7 @@ ul {
 }
 
 .typewriter-container {
-    height: 40px;
+    min-height: 40px;
     margin-bottom: 2rem;
     display: flex;
     align-items: center;
@@ -380,7 +380,9 @@ ul {
     font-family: var(--font-heading);
     font-size: 1.5rem;
     color: var(--text-secondary);
-    white-space: pre-wrap; /* allow wrapping on mobile */
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .typewriter-text::after {
@@ -815,6 +817,10 @@ footer {
     
     .typewriter-text {
         font-size: 1.2rem;
+    }
+    
+    .typewriter-container {
+        min-height: 60px;
     }
     
     .theme-toggle {
