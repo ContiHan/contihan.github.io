@@ -299,6 +299,40 @@ ul {
     animation: gridMove 20s linear infinite;
 }
 
+.hero-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+}
+
+.hero-content {
+    flex: 1;
+}
+
+.hero-image-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pixel-profile {
+    max-width: 320px;
+    width: 100%;
+    image-rendering: pixelated; /* Crucial for sharp pixel art */
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    border-radius: 12px;
+    filter: drop-shadow(0 0 10px var(--accent-glow));
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pixel-profile:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
+}
+
 [data-theme="light"] .hero::before {
     opacity: 0.3;
 }
@@ -933,6 +967,31 @@ footer {
 /* =========================================
    Responsive
 ========================================= */
+@media (max-width: 992px) {
+    .about-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .hero-container {
+        flex-direction: column-reverse;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .hero-image-wrapper {
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .hero-actions {
+        justify-content: center;
+    }
+    
+    .typewriter-container {
+        justify-content: center;
+    }
+}
+
 @media (max-width: 900px) {
     .glitch-title {
         font-size: 3.5rem;
