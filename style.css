@@ -257,7 +257,9 @@ ul {
    Hero Section
 ========================================= */
 .hero {
-    height: 100vh;
+    height: 100vh; /* Fallback for older browsers */
+    height: 100dvh; /* Dynamic viewport height to fix mobile cut-off */
+    min-height: 600px;
     display: flex;
     align-items: center;
     position: relative;
