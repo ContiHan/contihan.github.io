@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. Typewriter Effect ---
     const typewriterElement = document.getElementById('typewriter');
     const texts = [
-        "Analyzuji data a statistiky...",
-        "Hledám bezpečnostní zranitelnosti...",
-        "Optimalizuji performance...",
+        "Analyzing data and statistics...",
+        "Searching for security vulnerabilities...",
+        "Executing performance tests...",
         "May the Force be with you."
     ];
     let textIndex = 0;
