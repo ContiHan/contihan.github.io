@@ -20,7 +20,7 @@
     
     /* Typography */
     --font-main: 'Fira Code', monospace;
-    --font-heading: 'Orbitron', sans-serif;
+    --font-heading: 'Chakra Petch', sans-serif;
 }
 
 [data-theme="light"] {
@@ -194,17 +194,27 @@ ul {
     display: none;
     cursor: pointer;
     z-index: 1001;
+    width: 30px;
+    height: 24px;
+    position: relative;
+    background: transparent;
+    border: none;
 }
 
 .hamburger .bar {
     display: block;
-    width: 25px;
+    position: absolute;
+    width: 100%;
     height: 3px;
-    margin: 5px auto;
-    transition: all 0.3s ease-in-out;
     background-color: var(--accent-color);
     box-shadow: 0 0 5px var(--accent-glow);
+    transition: all 0.3s ease-in-out;
+    left: 0;
 }
+
+.hamburger .bar:nth-child(1) { top: 0; }
+.hamburger .bar:nth-child(2) { top: 10px; }
+.hamburger .bar:nth-child(3) { top: 20px; }
 
 .nav-links {
     display: flex;
@@ -834,16 +844,18 @@ footer {
         font-size: 1.5rem;
     }
     
+    .hamburger.active .bar:nth-child(1) {
+        top: 10px;
+        transform: rotate(45deg);
+    }
+    
     .hamburger.active .bar:nth-child(2) {
         opacity: 0;
     }
     
-    .hamburger.active .bar:nth-child(1) {
-        transform: translateY(8px) rotate(45deg);
-    }
-    
     .hamburger.active .bar:nth-child(3) {
-        transform: translateY(-8px) rotate(-45deg);
+        top: 10px;
+        transform: rotate(-45deg);
     }
 }
 
