@@ -20,7 +20,7 @@
     
     /* Typography */
     --font-main: 'Fira Code', monospace;
-    --font-heading: 'Orbitron', sans-serif;
+    --font-heading: 'Chakra Petch', sans-serif;
 }
 
 [data-theme="light"] {
@@ -107,21 +107,21 @@ ul {
 ========================================= */
 .theme-toggle {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    bottom: 30px;
+    right: 30px;
     z-index: 1000;
     background: var(--surface-color);
-    border: 1px solid var(--accent-color);
-    color: var(--accent-color);
-    width: 45px;
-    height: 45px;
+    color: var(--text-primary);
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 0 15px var(--accent-glow);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
 }
 
 .theme-toggle:hover {
@@ -222,12 +222,12 @@ ul {
 }
 
 .nav-link {
-    font-family: var(--font-main);
-    font-size: 0.9rem;
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+    text-decoration: none;
     font-weight: 500;
+    transition: color 0.3s;
     position: relative;
-    padding: 0.5rem 0;
-    transition: color 0.3s, text-shadow 0.3s;
 }
 
 .nav-link:hover {
@@ -370,23 +370,25 @@ ul {
 }
 
 .typewriter-container {
-    min-height: 60px;
-    margin-bottom: 3rem;
+    height: 40px;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
 }
 
 .typewriter-text {
-    font-size: 1.2rem;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
     color: var(--text-secondary);
-    max-width: 600px;
-    display: inline-block;
-    border-right: 2px solid var(--accent-color);
-    padding-right: 5px;
-    animation: pulse-cursor 0.8s infinite;
+    white-space: pre-wrap; /* allow wrapping on mobile */
 }
 
-@keyframes pulse-cursor {
-    0%, 100% { border-color: transparent; }
-    50% { border-color: var(--accent-color); }
+.typewriter-text::after {
+    content: '_';
+    color: var(--accent-color);
+    animation: blink 1s infinite;
+    font-weight: 700;
+    margin-left: 2px;
 }
 
 .hero-actions {
@@ -809,6 +811,17 @@ footer {
     
     .about-content {
         grid-template-columns: 1fr;
+    }
+    
+    .typewriter-text {
+        font-size: 1.2rem;
+    }
+    
+    .theme-toggle {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
     }
     
     .hamburger {
