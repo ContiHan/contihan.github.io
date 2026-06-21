@@ -140,21 +140,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Mobile Easter Egg: Tap profile picture 5 times fast
-    const profilePic = document.querySelector('.profile-glitch-container');
-    let tapCount = 0;
-    let tapTimeout;
+    // --- 6. Avatar Glitch Logic ---
+    const glitchContainer = document.querySelector('.profile-glitch-container');
+    const realProfile = document.querySelector('.real-profile');
+    const pixelProfile = document.querySelector('.pixel-profile');
     
-    if (profilePic) {
-        profilePic.addEventListener('click', () => {
+    if (glitchContainer && realProfile && pixelProfile) {
+        let isHovered = false;
+        let glitchTimeout;
+
+        const triggerGlitchIn = () => {
+            realProfile.classList.add('active-glitch');
+            pixelProfile.style.animation = 'none';
+            pixelProfile.offsetHeight; // trigger reflow
+            pixelProfile.style.animation = 'glitch-anim-in 0.5s cubic-bezier(.25, .46, .45, .94) forwards';
+        };
+
+        const triggerGlitchOut = () => {
+            realProfile.classList.remove('active-glitch');
+            pixelProfile.style.animation = 'none';
+            pixelProfile.offsetHeight;
+            pixelProfile.style.animation = 'glitch-anim-out 0.5s cubic-bezier(.25, .46, .45, .94) forwards';
+        };
+
+        const cycleGlitch = () => {
+            if (isHovered) return;
+            triggerGlitchIn();
+            glitchTimeout = setTimeout(() => {
+                if (!isHovered) triggerGlitchOut();
+            }, 3000); // Hold pixel art for 3 seconds
+        };
+
+        // Every 12 seconds
+        let autoGlitchInterval = setInterval(cycleGlitch, 12000);
+
+        glitchContainer.addEventListener('mouseenter', () => {
+            isHovered = true;
+            clearInterval(autoGlitchInterval);
+            clearTimeout(glitchTimeout);
+            triggerGlitchIn();
+        });
+
+        glitchContainer.addEventListener('mouseleave', () => {
+            isHovered = false;
+            triggerGlitchOut();
+            autoGlitchInterval = setInterval(cycleGlitch, 12000);
+        });
+
+        // Mobile Easter Egg: Tap profile picture 5 times fast
+        let tapCount = 0;
+        let tapTimeout;
+        glitchContainer.addEventListener('click', () => {
             tapCount++;
             clearTimeout(tapTimeout);
-            
             if (tapCount >= 5) {
                 activateMatrix();
                 tapCount = 0;
             } else {
-                tapTimeout = setTimeout(() => { tapCount = 0; }, 1000); // reset if 1 second passes without tap
+                tapTimeout = setTimeout(() => { tapCount = 0; }, 1000);
             }
         });
     }
