@@ -140,66 +140,94 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 6. Avatar Glitch Logic ---
+    // --- 6. Avatar Glitch Logic (Mobile & PC Unified) ---
     const glitchContainer = document.querySelector('.profile-glitch-container');
     const realProfile = document.querySelector('.real-profile');
     const pixelProfile = document.querySelector('.pixel-profile');
     
     if (glitchContainer && realProfile && pixelProfile) {
-        let isHovered = false;
-        let glitchTimeout;
+        let isPixel = false;
+        let autoGlitchInterval;
+        let interactionTimeout;
 
-        const triggerGlitchIn = () => {
-            realProfile.classList.add('active-glitch');
+        // Core state toggler
+        const setPixelState = (pixel) => {
+            if (isPixel === pixel) return;
+            isPixel = pixel;
             pixelProfile.style.animation = 'none';
             pixelProfile.offsetHeight; // trigger reflow
-            pixelProfile.style.animation = 'glitch-anim-in 0.5s cubic-bezier(.25, .46, .45, .94) forwards';
+            
+            if (isPixel) {
+                realProfile.classList.add('active-glitch');
+                pixelProfile.style.animation = 'glitch-anim-in 0.5s cubic-bezier(.25, .46, .45, .94) forwards';
+            } else {
+                realProfile.classList.remove('active-glitch');
+                pixelProfile.style.animation = 'glitch-anim-out 0.5s cubic-bezier(.25, .46, .45, .94) forwards';
+            }
         };
 
-        const triggerGlitchOut = () => {
-            realProfile.classList.remove('active-glitch');
-            pixelProfile.style.animation = 'none';
-            pixelProfile.offsetHeight;
-            pixelProfile.style.animation = 'glitch-anim-out 0.5s cubic-bezier(.25, .46, .45, .94) forwards';
-        };
-
-        const cycleGlitch = () => {
-            if (isHovered) return;
-            triggerGlitchIn();
-            glitchTimeout = setTimeout(() => {
-                if (!isHovered) triggerGlitchOut();
-            }, 3000); // Hold pixel art for 3 seconds
-        };
-
-        // Every 12 seconds
-        let autoGlitchInterval = setInterval(cycleGlitch, 12000);
-
-        glitchContainer.addEventListener('mouseenter', () => {
-            isHovered = true;
+        // Auto Cycle Logic
+        const startAutoCycle = () => {
             clearInterval(autoGlitchInterval);
-            clearTimeout(glitchTimeout);
-            triggerGlitchIn();
+            autoGlitchInterval = setInterval(() => {
+                if (!isPixel) {
+                    setPixelState(true);
+                    setTimeout(() => {
+                        if (isPixel) setPixelState(false);
+                    }, 3000); // Hold pixel art for 3 seconds
+                }
+            }, 12000);
+        };
+
+        // Suspend Auto Cycle after manual interaction
+        const suspendAutoCycle = () => {
+            clearInterval(autoGlitchInterval);
+            clearTimeout(interactionTimeout);
+            interactionTimeout = setTimeout(() => {
+                setPixelState(false);
+                startAutoCycle();
+            }, 5000); // 5 seconds of inactivity -> revert to normal and restart cycle
+        };
+
+        // Mouse Hover Events (PC only - skips touch)
+        glitchContainer.addEventListener('pointerenter', (e) => {
+            if (e.pointerType === 'mouse') {
+                clearInterval(autoGlitchInterval);
+                clearTimeout(interactionTimeout);
+                setPixelState(true);
+            }
         });
 
-        glitchContainer.addEventListener('mouseleave', () => {
-            isHovered = false;
-            triggerGlitchOut();
-            autoGlitchInterval = setInterval(cycleGlitch, 12000);
+        glitchContainer.addEventListener('pointerleave', (e) => {
+            if (e.pointerType === 'mouse') {
+                setPixelState(false);
+                startAutoCycle();
+            }
         });
 
-        // Mobile Easter Egg: Tap profile picture 5 times fast
+        // Click / Tap Events (Mobile & PC manual toggling)
         let tapCount = 0;
         let tapTimeout;
+        
         glitchContainer.addEventListener('click', () => {
+            // Easter egg logic
             tapCount++;
             clearTimeout(tapTimeout);
             if (tapCount >= 5) {
                 activateMatrix();
                 tapCount = 0;
+                return;
             } else {
                 tapTimeout = setTimeout(() => { tapCount = 0; }, 1000);
             }
+
+            // Toggle state manually
+            setPixelState(!isPixel);
+            suspendAutoCycle();
         });
+
+        // Start cycle initially
+        startAutoCycle();
     }
 
     function activateMatrix() {
