@@ -149,13 +149,20 @@ document.addEventListener('DOMContentLoaded', () => {
             repos.forEach(repo => {
                 const card = document.createElement('div');
                 card.className = 'github-card';
+                
+                const updatedDate = new Date(repo.pushed_at || repo.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                const desc = repo.description || 'System module encrypted. No public description available.';
+                
+                let statsHtml = `<span><i class="fas fa-clock"></i> ${updatedDate}</span>`;
+                if (repo.language) statsHtml += `<span><i class="fas fa-code"></i> ${repo.language}</span>`;
+                if (repo.stargazers_count > 0) statsHtml += `<span><i class="fas fa-star"></i> ${repo.stargazers_count}</span>`;
+                if (repo.forks_count > 0) statsHtml += `<span><i class="fas fa-code-branch"></i> ${repo.forks_count}</span>`;
+
                 card.innerHTML = `
                     <h4><a href="${repo.html_url}" target="_blank">${repo.name}</a></h4>
-                    <p>${repo.description || 'No description available.'}</p>
+                    <p>${desc}</p>
                     <div class="github-stats">
-                        ${repo.language ? `<span><i class="fas fa-code"></i> ${repo.language}</span>` : ''}
-                        <span><i class="fas fa-star"></i> ${repo.stargazers_count}</span>
-                        <span><i class="fas fa-code-branch"></i> ${repo.forks_count}</span>
+                        ${statsHtml}
                     </div>
                 `;
                 reposContainer.appendChild(card);
