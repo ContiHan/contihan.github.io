@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Mobile Easter Egg: Tap profile picture 5 times fast
-    const profilePic = document.querySelector('.pixel-profile');
+    const profilePic = document.querySelector('.profile-glitch-container');
     let tapCount = 0;
     let tapTimeout;
     
