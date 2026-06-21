@@ -995,10 +995,17 @@ footer {
 
     .hero-actions {
         justify-content: center;
+        flex-direction: column;
+        gap: 1.5rem;
     }
     
     .typewriter-container {
         justify-content: center;
+        min-height: 90px;
+    }
+
+    .scroll-indicator {
+        display: none;
     }
 }
 
@@ -1020,7 +1027,7 @@ footer {
     }
     
     .typewriter-container {
-        min-height: 60px;
+        min-height: 90px;
     }
     
     .theme-toggle {
