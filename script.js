@@ -421,21 +421,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const cursor = document.querySelector('.custom-cursor');
     const trail = document.querySelector('.cursor-trail');
     
-    // Only run if pointer is fine (desktop)
-    if (window.matchMedia("(pointer: fine)").matches) {
-        let mouseX = 0, mouseY = 0;
-        let trailX = 0, trailY = 0;
+    let mouseX = 0, mouseY = 0;
+    let trailX = 0, trailY = 0;
 
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            
-            // Move immediate cursor instantly
-            if (cursor) {
-                cursor.style.left = mouseX + 'px';
-                cursor.style.top = mouseY + 'px';
-            }
-        });
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        
+        // Move immediate cursor instantly
+        if (cursor) {
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        }
+    });
 
         // Animation loop for trail
         function animateTrail() {
@@ -449,19 +447,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         animateTrail();
 
-        // Hover effects
-        document.querySelectorAll('a, button, input, .project-card, .btn').forEach(el => {
-            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-        });
-    }
+    // Hover effects
+    document.querySelectorAll('a, button, input, .project-card, .btn').forEach(el => {
+        el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+        el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
 
 
     // --- 9. Scroll Progress Bar ---
     const scrollProgress = document.getElementById('scroll-progress');
     window.addEventListener('scroll', () => {
-        const scrollTop = window.scrollY;
-        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
         const scrollPercent = (scrollTop / docHeight) * 100;
         if (scrollProgress) {
             scrollProgress.style.width = scrollPercent + '%';
@@ -541,29 +538,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 11. 3D Tilt Effect for Desktop ---
-    if (window.matchMedia("(pointer: fine)").matches) {
-        const cards = document.querySelectorAll('.project-card');
-        
-        cards.forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left; // x position within the element
-                const y = e.clientY - rect.top;  // y position within the element
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const rotateX = ((y - centerY) / centerY) * -10; // max 10 deg
-                const rotateY = ((x - centerX) / centerX) * 10;
-                
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-            });
+    const cards = document.querySelectorAll('.project-card');
+    
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left; // x position within the element
+            const y = e.clientY - rect.top;  // y position within the element
             
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-            });
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = ((y - centerY) / centerY) * -10; // max 10 deg
+            const rotateY = ((x - centerX) / centerX) * 10;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
         });
-    }
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+        });
+    });
 
     // --- 12. Konami Code (Desktop & Mobile Swipes) ---
     const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
@@ -642,19 +637,51 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'flex';
         overlay.style.justifyContent = 'center';
         overlay.style.alignItems = 'center';
-        overlay.style.zIndex = '99999';
+        overlay.style.zIndex = '9999999';
         overlay.style.pointerEvents = 'none';
         overlay.innerHTML = '<h1>SYSTEM COMPROMISED</h1>';
         document.body.appendChild(overlay);
         
         setTimeout(() => {
             document.body.classList.remove('theme-transition-glitch');
-            overlay.remove();
+            overlay.innerHTML = ''; // clear text
+            overlay.style.backgroundColor = 'black';
+            overlay.style.opacity = '0.9';
             
-            // Trigger matrix background (existing function)
-            if (typeof activateMatrix === 'function') {
-                activateMatrix();
-            }
+            // Generate Matrix Rain inside overlay
+            const canvas = document.createElement('canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.style.display = 'block';
+            overlay.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%""\'#&_(),.;:?!\\|{}<>[]^~'.split('');
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = [];
+            for(let x = 0; x < columns; x++) drops[x] = 1;
+            
+            const matrixInterval = setInterval(() => {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0F0';
+                ctx.font = fontSize + 'px monospace';
+                for(let i = 0; i < drops.length; i++) {
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }, 33);
+            
+            // Allow user to click to dismiss
+            overlay.style.pointerEvents = 'auto';
+            overlay.style.cursor = 'pointer';
+            overlay.addEventListener('click', () => {
+                clearInterval(matrixInterval);
+                overlay.remove();
+            });
         }, 3000);
     }
 });
