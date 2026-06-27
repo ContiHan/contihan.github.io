@@ -363,27 +363,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioToggleBtn = document.getElementById('audio-toggle');
     const audioIcon = audioToggleBtn.querySelector('i');
 
-    audioToggleBtn.addEventListener('click', () => {
-        if (!audioContext) {
-            audioContext = new AudioContextClass();
-        }
-        
-        isMuted = !isMuted;
-        if (isMuted) {
-            audioIcon.classList.remove('fa-volume-up');
-            audioIcon.classList.add('fa-volume-mute');
-        } else {
-            audioIcon.classList.remove('fa-volume-mute');
-            audioIcon.classList.add('fa-volume-up');
-            // Resume context if suspended (required by browsers)
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
+    if (audioToggleBtn) {
+        audioToggleBtn.addEventListener('click', () => {
+            if (!audioContext) {
+                audioContext = new AudioContextClass();
             }
-            // Play a startup sound
-            playBeep(440, 'sine', 0.1);
-            playBeep(880, 'sine', 0.1, 0.1);
-        }
-    });
+            
+            isMuted = !isMuted;
+            if (isMuted) {
+                audioIcon.classList.remove('fa-volume-up');
+                audioIcon.classList.add('fa-volume-mute');
+            } else {
+                audioIcon.classList.remove('fa-volume-mute');
+                audioIcon.classList.add('fa-volume-up');
+                // Resume context if suspended (required by browsers)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                // Play a startup sound
+                playBeep(440, 'sine', 0.1);
+                playBeep(880, 'sine', 0.1, 0.1);
+            }
+        });
+    }
 
     function playBeep(freq = 440, type = 'sine', duration = 0.1, delay = 0) {
         if (isMuted || !audioContext) return;
@@ -409,7 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Theme toggle sound
-    document.getElementById('theme-toggle').addEventListener('click', () => playBeep(200, 'sawtooth', 0.2));
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => playBeep(200, 'sawtooth', 0.2));
+    }
 
 
     // --- 8. Custom Cursor & Trail ---
@@ -475,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.value = '';
                 
                 // Print command
-                printTerminalLine(<span class="prompt">contihan@mainframe:~$</span> );
+                printTerminalLine(`<span class="prompt">contihan@mainframe:~$</span> ${cmd}`);
                 
                 // Process command
                 processCommand(cmd);
@@ -493,7 +498,11 @@ document.addEventListener('DOMContentLoaded', () => {
             div.innerHTML = html;
             // Insert before the input line
             const inputLine = document.querySelector('.terminal-input-line');
-            terminalBody.insertBefore(div, inputLine);
+            if (inputLine) {
+                terminalBody.insertBefore(div, inputLine);
+            } else {
+                terminalBody.appendChild(div);
+            }
         }
 
         function processCommand(cmd) {
@@ -502,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     printTerminalLine('Available commands: <br> - <span class="highlight-cmd">whoami</span>: Display user info<br> - <span class="highlight-cmd">skills</span>: List technical stack<br> - <span class="highlight-cmd">clear</span>: Clear terminal<br> - <span class="highlight-cmd">projects</span>: Jump to projects');
                     break;
                 case 'whoami':
-                    printTerminalLine('404: Human not found. Running Daniel.exe...<br>I am Daniel Han·k, a QA, Performance, and Security Engineer obsessed with Data Science and AI models.');
+                    printTerminalLine('404: Human not found. Running Daniel.exe...<br>I am Daniel Han√°k, a QA, Performance, and Security Engineer obsessed with Data Science and AI models.');
                     break;
                 case 'skills':
                     printTerminalLine('Loading skill matrix...<br>[OK] Python, Java, C#<br>[OK] Cypress, Playwright, Selenium<br>[OK] JMeter, K6, Gatling<br>[OK] SQL, NoSQL, APIs');
@@ -518,14 +527,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 case '':
                     break;
                 default:
-                    printTerminalLine(Command not found: . Type 'help' for available commands.);
+                    printTerminalLine(`Command not found: ${cmd}. Type 'help' for available commands.`);
             }
         }
         
         // Terminal Window controls click focus
-        document.querySelector('.terminal-window').addEventListener('click', () => {
-            terminalInput.focus();
-        });
+        const termWin = document.querySelector('.terminal-window');
+        if (termWin) {
+            termWin.addEventListener('click', () => {
+                terminalInput.focus();
+            });
+        }
     }
 
     // --- 11. 3D Tilt Effect for Desktop ---
@@ -544,11 +556,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rotateX = ((y - centerY) / centerY) * -10; // max 10 deg
                 const rotateY = ((x - centerX) / centerX) * 10;
                 
-                card.style.transform = perspective(1000px) rotateX(deg) rotateY(deg) scale3d(1.02, 1.02, 1.02);
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
             });
             
             card.addEventListener('mouseleave', () => {
-                card.style.transform = perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1);
+                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
             });
         });
     }

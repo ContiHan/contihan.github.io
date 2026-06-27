@@ -1174,9 +1174,9 @@ body.theme-transition-glitch {
 /* Audio Toggle */
 .audio-toggle {
     position: fixed;
-    top: 20px;
-    right: 80px;
-    background: var(--bg-surface);
+    bottom: 90px;
+    right: 32px;
+    background: var(--surface-color);
     color: var(--primary-color);
     width: 45px;
     height: 45px;
@@ -1197,8 +1197,8 @@ body.theme-transition-glitch {
 }
 @media (max-width: 768px) {
     .audio-toggle {
-        right: 70px;
-        top: 15px;
+        right: 20px;
+        bottom: 75px;
         width: 40px;
         height: 40px;
     }
