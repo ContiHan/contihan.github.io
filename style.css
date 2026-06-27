@@ -1138,3 +1138,20 @@ footer {
         align-items: center;
     }
 }
+
+/* --- Global Theme Transition Glitch --- */
+@keyframes global-theme-glitch {
+    0% { filter: hue-rotate(0deg) contrast(100%); transform: translate(0); }
+    10% { filter: hue-rotate(90deg) contrast(200%) invert(20%) drop-shadow(10px 0 0 rgba(255,0,0,0.5)); transform: translate(-10px, 5px) skewX(2deg); }
+    20% { filter: hue-rotate(-90deg) contrast(150%) drop-shadow(-10px 0 0 rgba(0,255,255,0.5)); transform: translate(10px, -5px) skewX(-2deg); }
+    30% { filter: hue-rotate(180deg) contrast(200%) invert(20%); transform: translate(-10px, 0) skewY(1deg); }
+    40% { filter: hue-rotate(45deg) contrast(120%) drop-shadow(5px 5px 0 rgba(0,255,0,0.5)); transform: translate(10px, 5px) skewX(1deg); }
+    50% { filter: hue-rotate(0deg) contrast(150%); transform: translate(-5px, -5px) skewY(-1deg); }
+    60% { filter: hue-rotate(90deg) contrast(200%) invert(10%); transform: translate(5px, 5px); }
+    100% { filter: hue-rotate(0deg) contrast(100%) invert(0%); transform: translate(0) skew(0); }
+}
+
+body.theme-transition-glitch {
+    animation: global-theme-glitch 0.5s cubic-bezier(.25, .46, .45, .94) both;
+    overflow-x: hidden;
+}

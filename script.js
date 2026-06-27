@@ -93,11 +93,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         updateIcon(newTheme);
         
-        // Matrix glitch effect on theme switch (optional cool detail)
-        document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+        // Extreme Matrix glitch effect on theme switch
+        document.body.classList.add('theme-transition-glitch');
         setTimeout(() => {
-            document.body.style.filter = 'none';
-        }, 150);
+            document.body.classList.remove('theme-transition-glitch');
+        }, 500);
     });
 
     function updateIcon(theme) {
