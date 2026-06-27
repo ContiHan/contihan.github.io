@@ -94,9 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
         updateIcon(newTheme);
         
         // Extreme Matrix glitch effect on theme switch
-        document.body.classList.add('theme-transition-glitch');
+        document.body.classList.add('konami-active');
         setTimeout(() => {
-            document.body.classList.remove('theme-transition-glitch');
+            document.body.classList.remove('konami-active');
         }, 500);
     });
 
@@ -359,6 +359,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 7. Audio System ---
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     let audioContext = null;
+    
+    // Pre-warm audio context on first arbitrary user interaction
+    const initAudio = () => {
+        if (!audioContext) {
+            audioContext = new AudioContextClass();
+        }
+        document.removeEventListener('pointerdown', initAudio);
+        document.removeEventListener('keydown', initAudio);
+    };
+    document.addEventListener('pointerdown', initAudio, { once: true });
+    document.addEventListener('keydown', initAudio, { once: true });
     let isMuted = true; // start muted to comply with browser autoplay policies
     const audioToggleBtn = document.getElementById('audio-toggle');
     const audioIcon = audioToggleBtn.querySelector('i');
@@ -425,9 +436,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let trailX = 0, trailY = 0;
 
     
-    document.addEventListener('mousemove', function mouseDetector(e) {
-        document.body.classList.add('has-mouse');
-        document.removeEventListener('mousemove', mouseDetector);
+    document.addEventListener('pointermove', function mouseDetector(e) {
+        if (e.pointerType === 'mouse') {
+            document.body.classList.add('has-mouse');
+            document.removeEventListener('pointermove', mouseDetector);
+        }
     });
     
     document.addEventListener('mousemove', (e) => {
@@ -639,11 +652,11 @@ document.addEventListener('DOMContentLoaded', () => {
         playBeep(400, 'sawtooth', 0.5, 0.5);
         playBeep(600, 'sawtooth', 0.5, 1.0);
         
-        document.body.classList.add('theme-transition-glitch');
+        document.body.classList.add('konami-active');
         
         // Let it glitch for 3 seconds then recover
         setTimeout(() => {
-            document.body.classList.remove('theme-transition-glitch');
+            document.body.classList.remove('konami-active');
         }, 3000);
     }
     

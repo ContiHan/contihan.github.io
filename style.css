@@ -1207,23 +1207,10 @@ body.theme-transition-glitch {
 /* Custom Cursor */
 
 /* Dynamic cursor classes */
-body.has-mouse, body.has-mouse a, body.has-mouse button, body.has-mouse input {
-    cursor: none !important;
-}
+/* (Native cursors kept for UX precision) */
 .custom-cursor {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 10px;
-        height: 10px;
-        background-color: #00ffcc;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 10000;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 0 10px #00ffcc;
-        transition: width 0.2s, height 0.2s, background-color 0.2s;
-    }
+    display: none;
+}
 
     .cursor-trail {
         position: fixed;
@@ -1240,11 +1227,8 @@ body.has-mouse, body.has-mouse a, body.has-mouse button, body.has-mouse input {
     }
     
     body.cursor-hover .custom-cursor {
-        width: 20px;
-        height: 20px;
-        background-color: transparent;
-        border: 2px solid #00ffcc;
-    }
+    display: none;
+}
     body.cursor-hover .cursor-trail {
         width: 50px;
         height: 50px;
@@ -1368,4 +1352,28 @@ html[data-theme="light"] .terminal-input-line .prompt {
 }
 html[data-theme="light"] .highlight-cmd {
     color: #cc0066;
+}
+
+/* Scroll Progress Light Theme Override */
+html[data-theme="light"] #scroll-progress {
+    background: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color);
+}
+
+/* Konami Violent Glitch */
+@keyframes konami-glitch {
+    0% { filter: invert(1) hue-rotate(90deg) contrast(2); transform: translate(5px, 5px) skew(5deg); }
+    10% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-5px, -5px) skew(-5deg); }
+    20% { filter: invert(1) hue-rotate(180deg) contrast(3); transform: translate(10px, 0px) skew(10deg) scale(1.05); }
+    30% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-10px, 10px) skew(-10deg); }
+    40% { filter: hue-rotate(270deg) contrast(2); transform: translate(5px, -10px) skew(5deg) scale(0.95); }
+    50% { filter: invert(1) hue-rotate(90deg) contrast(2); transform: translate(-5px, 5px) skew(-5deg); }
+    60% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(10px, -5px) skew(10deg); }
+    70% { filter: hue-rotate(180deg) contrast(3); transform: translate(-10px, 0px) skew(-10deg) scale(1.05); }
+    80% { filter: invert(1) hue-rotate(270deg) contrast(2); transform: translate(5px, 10px) skew(5deg); }
+    90% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-5px, -10px) skew(-5deg) scale(0.95); }
+    100% { filter: none; transform: none; }
+}
+.konami-active {
+    animation: konami-glitch 0.3s infinite;
 }
