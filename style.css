@@ -1224,16 +1224,26 @@ body.theme-transition-glitch {
         z-index: 9999;
         transform: translate(-50%, -50%);
         transition: width 0.2s, height 0.2s;
+        opacity: 0;
     }
     
     body.cursor-hover .custom-cursor {
     display: none;
 }
     body.cursor-hover .cursor-trail {
-        width: 50px;
-        height: 50px;
-        border-color: #ff00ff;
-}
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+        border: 1px solid #00ffcc;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.2s, height 0.2s;
+        opacity: 0;
+    }
 
 /* Terminal Section */
 .terminal-section {
@@ -1377,3 +1387,5 @@ html[data-theme="light"] #scroll-progress {
 .konami-active {
     animation: konami-glitch 0.3s infinite;
 }
+
+body.has-mouse .cursor-trail { opacity: 1; }

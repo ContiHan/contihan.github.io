@@ -365,7 +365,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!audioContext) {
             audioContext = new AudioContextClass();
         }
-        document.removeEventListener('pointerdown', initAudio);
+        
+            // Play an inaudible, microscopic beep to force the engine to start processing
+            playBeep(20000, 'sine', 0.001);
+            document.removeEventListener('pointerdown', initAudio);
         document.removeEventListener('keydown', initAudio);
     };
     document.addEventListener('pointerdown', initAudio, { once: true });
@@ -399,6 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playBeep(freq = 440, type = 'sine', duration = 0.1, delay = 0) {
+        if (isMuted || !audioContext) return;
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
         if (isMuted || !audioContext) return;
         
         const osc = audioContext.createOscillator();
@@ -443,7 +450,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('pointermove', (e) => {
+        if (e.pointerType !== 'mouse') return;
         mouseX = e.clientX;
         mouseY = e.clientY;
         
@@ -496,6 +504,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalBody = document.getElementById('terminal-body');
 
     if (terminalInput) {
+        terminalInput.addEventListener('input', () => {
+            playBeep(400 + Math.random() * 100, 'square', 0.02);
+        });
         terminalInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const cmd = this.value.trim().toLowerCase();
@@ -570,7 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.project-card');
     
     cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
+        card.addEventListener('pointermove', (e) => {
+            if (e.pointerType !== 'mouse') return; // ignore touch taps on mobile
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left; // x position within the element
             const y = e.clientY - rect.top;  // y position within the element
