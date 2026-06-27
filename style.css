@@ -1155,3 +1155,184 @@ body.theme-transition-glitch {
     animation: global-theme-glitch 0.5s cubic-bezier(.25, .46, .45, .94) both;
     overflow-x: hidden;
 }
+
+/* --- Cyberpunk Features Styles --- */
+
+/* Scroll Progress Bar */
+#scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+    z-index: 9999;
+    transition: width 0.1s ease;
+}
+
+/* Audio Toggle */
+.audio-toggle {
+    position: fixed;
+    top: 20px;
+    right: 80px;
+    background: var(--bg-surface);
+    color: var(--primary-color);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+    border: 1px solid rgba(0, 255, 204, 0.3);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+.audio-toggle:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 204, 0.6);
+    transform: scale(1.1);
+}
+@media (max-width: 768px) {
+    .audio-toggle {
+        right: 70px;
+        top: 15px;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Custom Cursor */
+@media (pointer: fine) {
+    body, a, button, input {
+        cursor: crosshair !important;
+    }
+    
+    .custom-cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 10px;
+        height: 10px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 10000;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 10px var(--primary-color);
+        transition: width 0.2s, height 0.2s, background-color 0.2s;
+    }
+
+    .cursor-trail {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+        border: 1px solid rgba(0, 255, 204, 0.5);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.2s, height 0.2s;
+    }
+    
+    body.cursor-hover .custom-cursor {
+        width: 20px;
+        height: 20px;
+        background-color: transparent;
+        border: 2px solid var(--primary-color);
+    }
+    body.cursor-hover .cursor-trail {
+        width: 50px;
+        height: 50px;
+        border-color: var(--accent-color);
+    }
+}
+
+/* Terminal Section */
+.terminal-section {
+    padding: 2rem 0;
+}
+.terminal-window {
+    background-color: #0a0a0a;
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 255, 204, 0.1), inset 0 0 10px rgba(0,255,204,0.05);
+    overflow: hidden;
+    font-family: 'Fira Code', monospace;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.terminal-header {
+    background-color: #151515;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+.terminal-buttons {
+    display: flex;
+    gap: 8px;
+    margin-right: 15px;
+}
+.terminal-buttons .btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+.btn.close { background-color: #ff5f56; }
+.btn.minimize { background-color: #ffbd2e; }
+.btn.maximize { background-color: #27c93f; }
+
+.terminal-title {
+    color: #666;
+    font-size: 0.9rem;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.terminal-body {
+    padding: 20px;
+    color: var(--primary-color);
+    height: 300px;
+    overflow-y: auto;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+.terminal-line {
+    margin-bottom: 10px;
+    word-break: break-word;
+}
+.highlight-cmd {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.terminal-input-line {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+.terminal-input-line .prompt {
+    margin-right: 10px;
+    color: var(--text-color);
+}
+.terminal-input-line input {
+    background: transparent;
+    border: none;
+    color: var(--primary-color);
+    font-family: 'Fira Code', monospace;
+    font-size: 1rem;
+    flex-grow: 1;
+    outline: none;
+    text-shadow: 0 0 5px var(--primary-color);
+}
+
+/* 3D Tilt for Project Cards */
+.project-card {
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    transform-style: preserve-3d;
+}

@@ -353,3 +353,296 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchGithubRepos();
 
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 7. Audio System ---
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    let audioContext = null;
+    let isMuted = true; // start muted to comply with browser autoplay policies
+    const audioToggleBtn = document.getElementById('audio-toggle');
+    const audioIcon = audioToggleBtn.querySelector('i');
+
+    audioToggleBtn.addEventListener('click', () => {
+        if (!audioContext) {
+            audioContext = new AudioContextClass();
+        }
+        
+        isMuted = !isMuted;
+        if (isMuted) {
+            audioIcon.classList.remove('fa-volume-up');
+            audioIcon.classList.add('fa-volume-mute');
+        } else {
+            audioIcon.classList.remove('fa-volume-mute');
+            audioIcon.classList.add('fa-volume-up');
+            // Resume context if suspended (required by browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            // Play a startup sound
+            playBeep(440, 'sine', 0.1);
+            playBeep(880, 'sine', 0.1, 0.1);
+        }
+    });
+
+    function playBeep(freq = 440, type = 'sine', duration = 0.1, delay = 0) {
+        if (isMuted || !audioContext) return;
+        
+        const osc = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioContext.currentTime + delay);
+        
+        // fade out slightly to prevent clicks
+        gainNode.gain.setValueAtTime(0.05, audioContext.currentTime + delay);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + delay + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        osc.start(audioContext.currentTime + delay);
+        osc.stop(audioContext.currentTime + delay + duration);
+    }
+
+    // Play sound on button hovers
+    document.querySelectorAll('a, button, .btn').forEach(el => {
+        el.addEventListener('mouseenter', () => playBeep(800, 'sine', 0.05));
+    });
+
+    // Theme toggle sound
+    document.getElementById('theme-toggle').addEventListener('click', () => playBeep(200, 'sawtooth', 0.2));
+
+
+    // --- 8. Custom Cursor & Trail ---
+    const cursor = document.querySelector('.custom-cursor');
+    const trail = document.querySelector('.cursor-trail');
+    
+    // Only run if pointer is fine (desktop)
+    if (window.matchMedia("(pointer: fine)").matches) {
+        let mouseX = 0, mouseY = 0;
+        let trailX = 0, trailY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Move immediate cursor instantly
+            if (cursor) {
+                cursor.style.left = mouseX + 'px';
+                cursor.style.top = mouseY + 'px';
+            }
+        });
+
+        // Animation loop for trail
+        function animateTrail() {
+            trailX += (mouseX - trailX) * 0.2; // ease factor
+            trailY += (mouseY - trailY) * 0.2;
+            if (trail) {
+                trail.style.left = trailX + 'px';
+                trail.style.top = trailY + 'px';
+            }
+            requestAnimationFrame(animateTrail);
+        }
+        animateTrail();
+
+        // Hover effects
+        document.querySelectorAll('a, button, input, .project-card, .btn').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+        });
+    }
+
+
+    // --- 9. Scroll Progress Bar ---
+    const scrollProgress = document.getElementById('scroll-progress');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        if (scrollProgress) {
+            scrollProgress.style.width = scrollPercent + '%';
+        }
+    });
+
+
+    // --- 10. Interactive Terminal ---
+    const terminalInput = document.getElementById('terminal-input');
+    const terminalBody = document.getElementById('terminal-body');
+
+    if (terminalInput) {
+        terminalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = this.value.trim().toLowerCase();
+                this.value = '';
+                
+                // Print command
+                printTerminalLine(<span class="prompt">contihan@mainframe:~$</span> );
+                
+                // Process command
+                processCommand(cmd);
+                
+                // Scroll to bottom
+                terminalBody.scrollTop = terminalBody.scrollHeight;
+                
+                playBeep(300, 'square', 0.1); // Keyboard hit sound
+            }
+        });
+
+        function printTerminalLine(html) {
+            const div = document.createElement('div');
+            div.className = 'terminal-line';
+            div.innerHTML = html;
+            // Insert before the input line
+            const inputLine = document.querySelector('.terminal-input-line');
+            terminalBody.insertBefore(div, inputLine);
+        }
+
+        function processCommand(cmd) {
+            switch(cmd) {
+                case 'help':
+                    printTerminalLine('Available commands: <br> - <span class="highlight-cmd">whoami</span>: Display user info<br> - <span class="highlight-cmd">skills</span>: List technical stack<br> - <span class="highlight-cmd">clear</span>: Clear terminal<br> - <span class="highlight-cmd">projects</span>: Jump to projects');
+                    break;
+                case 'whoami':
+                    printTerminalLine('404: Human not found. Running Daniel.exe...<br>I am Daniel Hanák, a QA, Performance, and Security Engineer obsessed with Data Science and AI models.');
+                    break;
+                case 'skills':
+                    printTerminalLine('Loading skill matrix...<br>[OK] Python, Java, C#<br>[OK] Cypress, Playwright, Selenium<br>[OK] JMeter, K6, Gatling<br>[OK] SQL, NoSQL, APIs');
+                    break;
+                case 'projects':
+                    printTerminalLine('Redirecting to sector 03...');
+                    setTimeout(() => document.getElementById('projects').scrollIntoView({behavior: 'smooth'}), 500);
+                    break;
+                case 'clear':
+                    const lines = terminalBody.querySelectorAll('.terminal-line:not(.terminal-input-line)');
+                    lines.forEach(l => l.remove());
+                    break;
+                case '':
+                    break;
+                default:
+                    printTerminalLine(Command not found: . Type 'help' for available commands.);
+            }
+        }
+        
+        // Terminal Window controls click focus
+        document.querySelector('.terminal-window').addEventListener('click', () => {
+            terminalInput.focus();
+        });
+    }
+
+    // --- 11. 3D Tilt Effect for Desktop ---
+    if (window.matchMedia("(pointer: fine)").matches) {
+        const cards = document.querySelectorAll('.project-card');
+        
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left; // x position within the element
+                const y = e.clientY - rect.top;  // y position within the element
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; // max 10 deg
+                const rotateY = ((x - centerX) / centerX) * 10;
+                
+                card.style.transform = perspective(1000px) rotateX(deg) rotateY(deg) scale3d(1.02, 1.02, 1.02);
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1);
+            });
+        });
+    }
+
+    // --- 12. Konami Code (Desktop & Mobile Swipes) ---
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    
+    // Desktop Keyboard
+    document.addEventListener('keydown', (e) => {
+        if (e.key === konamiCode[konamiIndex] || e.key.toLowerCase() === konamiCode[konamiIndex].toLowerCase()) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                triggerKonami();
+                konamiIndex = 0;
+            }
+        } else {
+            konamiIndex = 0;
+        }
+    });
+
+    // Mobile Swipe
+    let touchStartX = 0, touchStartY = 0;
+    let swipeSequence = [];
+    const expectedSwipes = ['UP', 'UP', 'DOWN', 'DOWN', 'LEFT', 'RIGHT', 'LEFT', 'RIGHT'];
+    
+    document.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive: true});
+
+    document.addEventListener('touchend', e => {
+        const touchEndX = e.changedTouches[0].screenX;
+        const touchEndY = e.changedTouches[0].screenY;
+        
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+        
+        let swipeDir = '';
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+            swipeDir = diffX > 0 ? 'RIGHT' : 'LEFT';
+        } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 30) {
+            swipeDir = diffY > 0 ? 'DOWN' : 'UP';
+        }
+
+        if (swipeDir) {
+            if (expectedSwipes[swipeSequence.length] === swipeDir) {
+                swipeSequence.push(swipeDir);
+                if (swipeSequence.length === expectedSwipes.length) {
+                    triggerKonami();
+                    swipeSequence = [];
+                }
+            } else {
+                swipeSequence = [];
+                if (expectedSwipes[0] === swipeDir) {
+                    swipeSequence.push(swipeDir);
+                }
+            }
+        }
+    }, {passive: true});
+
+    function triggerKonami() {
+        playBeep(200, 'sawtooth', 0.5);
+        playBeep(400, 'sawtooth', 0.5, 0.5);
+        playBeep(600, 'sawtooth', 0.5, 1.0);
+        
+        document.body.classList.add('theme-transition-glitch');
+        
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+        overlay.style.color = '#0f0';
+        overlay.style.fontFamily = 'monospace';
+        overlay.style.fontSize = '2rem';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        overlay.style.zIndex = '99999';
+        overlay.style.pointerEvents = 'none';
+        overlay.innerHTML = '<h1>SYSTEM COMPROMISED</h1>';
+        document.body.appendChild(overlay);
+        
+        setTimeout(() => {
+            document.body.classList.remove('theme-transition-glitch');
+            overlay.remove();
+            
+            // Trigger matrix background (existing function)
+            if (typeof activateMatrix === 'function') {
+                activateMatrix();
+            }
+        }, 3000);
+    }
+});

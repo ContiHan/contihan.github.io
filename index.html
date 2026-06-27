@@ -29,9 +29,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Custom Cursor (Desktop Only) -->
+    <div class="custom-cursor"></div>
+    <div class="cursor-trail"></div>
+
+    <!-- Scroll Progress Bar -->
+    <div id="scroll-progress"></div>
+
     <!-- Theme Toggle -->
     <div class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
         <i class="fas fa-adjust"></i>
+    </div>
+
+    <!-- Audio Toggle -->
+    <div class="audio-toggle" id="audio-toggle" aria-label="Toggle audio">
+        <i class="fas fa-volume-mute"></i>
     </div>
 
     <!-- Navigation -->
@@ -98,6 +110,30 @@
                 </div>
                 <div class="arrow-down">
                     <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- Terminal Section -->
+        <section id="terminal-section" class="terminal-section">
+            <div class="container section-reveal">
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="btn close"></span>
+                            <span class="btn minimize"></span>
+                            <span class="btn maximize"></span>
+                        </div>
+                        <div class="terminal-title">contihan@mainframe: ~</div>
+                    </div>
+                    <div class="terminal-body" id="terminal-body">
+                        <div class="terminal-line">Login successful.</div>
+                        <div class="terminal-line">Type <span class="highlight-cmd">'help'</span> for a list of commands.</div>
+                        <div class="terminal-input-line">
+                            <span class="prompt">contihan@mainframe:~$</span>
+                            <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" autofocus>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
