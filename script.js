@@ -424,6 +424,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let mouseX = 0, mouseY = 0;
     let trailX = 0, trailY = 0;
 
+    
+    document.addEventListener('mousemove', function mouseDetector(e) {
+        document.body.classList.add('has-mouse');
+        document.removeEventListener('mousemove', mouseDetector);
+    });
+    
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
@@ -458,7 +464,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollProgress = document.getElementById('scroll-progress');
     window.addEventListener('scroll', () => {
         const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
+        
+        const bodyScroll = document.body.scrollHeight || 0;
+        const docScroll = document.documentElement.scrollHeight || 0;
+        const totalHeight = Math.max(bodyScroll, docScroll);
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        const docHeight = totalHeight - windowHeight;
+
         const scrollPercent = (scrollTop / docHeight) * 100;
         if (scrollProgress) {
             scrollProgress.style.width = scrollPercent + '%';
@@ -516,6 +528,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'projects':
                     printTerminalLine('Redirecting to sector 03...');
                     setTimeout(() => document.getElementById('projects').scrollIntoView({behavior: 'smooth'}), 500);
+                    break;
+                case 'matrix':
+                    printTerminalLine('Initializing Matrix protocol...');
+                    setTimeout(triggerMatrix, 1000);
                     break;
                 case 'clear':
                     const lines = terminalBody.querySelectorAll('.terminal-line:not(.terminal-input-line)');
@@ -617,6 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, {passive: true});
 
+    
     function triggerKonami() {
         playBeep(200, 'sawtooth', 0.5);
         playBeep(400, 'sawtooth', 0.5, 0.5);
@@ -624,64 +641,57 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.body.classList.add('theme-transition-glitch');
         
+        // Let it glitch for 3 seconds then recover
+        setTimeout(() => {
+            document.body.classList.remove('theme-transition-glitch');
+        }, 3000);
+    }
+    
+    // Matrix Easter Egg for Terminal
+    function triggerMatrix() {
+        playBeep(300, 'square', 1.0);
         const overlay = document.createElement('div');
         overlay.style.position = 'fixed';
         overlay.style.top = '0';
         overlay.style.left = '0';
         overlay.style.width = '100vw';
         overlay.style.height = '100vh';
-        overlay.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
-        overlay.style.color = '#0f0';
-        overlay.style.fontFamily = 'monospace';
-        overlay.style.fontSize = '2rem';
-        overlay.style.display = 'flex';
-        overlay.style.justifyContent = 'center';
-        overlay.style.alignItems = 'center';
+        overlay.style.backgroundColor = 'black';
         overlay.style.zIndex = '9999999';
-        overlay.style.pointerEvents = 'none';
-        overlay.innerHTML = '<h1>SYSTEM COMPROMISED</h1>';
-        document.body.appendChild(overlay);
         
-        setTimeout(() => {
-            document.body.classList.remove('theme-transition-glitch');
-            overlay.innerHTML = ''; // clear text
-            overlay.style.backgroundColor = 'black';
-            overlay.style.opacity = '0.9';
-            
-            // Generate Matrix Rain inside overlay
-            const canvas = document.createElement('canvas');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            canvas.style.display = 'block';
-            overlay.appendChild(canvas);
-            const ctx = canvas.getContext('2d');
-            
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%""\'#&_(),.;:?!\\|{}<>[]^~'.split('');
-            const fontSize = 16;
-            const columns = canvas.width / fontSize;
-            const drops = [];
-            for(let x = 0; x < columns; x++) drops[x] = 1;
-            
-            const matrixInterval = setInterval(() => {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#0F0';
-                ctx.font = fontSize + 'px monospace';
-                for(let i = 0; i < drops.length; i++) {
-                    const text = chars[Math.floor(Math.random() * chars.length)];
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                    drops[i]++;
-                }
-            }, 33);
-            
-            // Allow user to click to dismiss
-            overlay.style.pointerEvents = 'auto';
-            overlay.style.cursor = 'pointer';
-            overlay.addEventListener('click', () => {
-                clearInterval(matrixInterval);
-                overlay.remove();
-            });
-        }, 3000);
+        const canvas = document.createElement('canvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvas.style.display = 'block';
+        overlay.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%""\'#&_(),.;:?!\\|{}<>[]^~'.split('');
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+        for(let x = 0; x < columns; x++) drops[x] = 1;
+        
+        const matrixInterval = setInterval(() => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+            for(let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }, 33);
+        
+        // Allow user to click to dismiss
+        overlay.style.cursor = 'pointer';
+        overlay.addEventListener('click', () => {
+            clearInterval(matrixInterval);
+            overlay.remove();
+        });
+        document.body.appendChild(overlay);
     }
+
 });

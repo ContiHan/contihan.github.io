@@ -1164,10 +1164,10 @@ body.theme-transition-glitch {
     top: 0;
     left: 0;
     width: 0%;
-    height: 3px;
-    background: var(--primary-color);
-    box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
-    z-index: 9999;
+    height: 4px;
+    background: #00ffcc;
+    box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+    z-index: 9999999;
     transition: width 0.1s ease;
 }
 
@@ -1176,43 +1176,41 @@ body.theme-transition-glitch {
     position: fixed;
     bottom: 90px;
     right: 30px;
+    z-index: 1000;
     background: var(--surface-color);
     color: var(--text-primary);
     width: 50px;
     height: 50px;
     border-radius: 50%;
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-size: 1.2rem;
+    justify-content: center;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    border: 1px solid var(--border-color);
-    z-index: 1000;
     transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
 }
 .audio-toggle:hover {
-    box-shadow: 0 0 15px var(--primary-color);
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-    transform: scale(1.1);
+    transform: scale(1.1) rotate(15deg);
+    background: var(--accent-color);
+    color: var(--bg-color);
 }
 @media (max-width: 768px) {
     .audio-toggle {
-        right: 20px;
         bottom: 75px;
-        width: 40px;
-        height: 40px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
     }
 }
 
 /* Custom Cursor */
-@media (pointer: fine) {
-    body, a, button, input {
-        cursor: none !important;
-    }
-    
-    .custom-cursor {
+
+/* Dynamic cursor classes */
+body.has-mouse, body.has-mouse a, body.has-mouse button, body.has-mouse input {
+    cursor: none !important;
+}
+.custom-cursor {
         position: fixed;
         top: 0;
         left: 0;
@@ -1251,7 +1249,6 @@ body.theme-transition-glitch {
         width: 50px;
         height: 50px;
         border-color: #ff00ff;
-    }
 }
 
 /* Terminal Section */
@@ -1301,8 +1298,14 @@ body.theme-transition-glitch {
     color: #00ffcc;
     height: 300px;
     overflow-y: auto;
+    overflow-x: hidden;
     font-size: 1rem;
     line-height: 1.5;
+}
+@media (max-width: 768px) {
+    .terminal-body {
+        height: 200px;
+    }
 }
 .terminal-line {
     margin-bottom: 10px;
@@ -1337,4 +1340,32 @@ body.theme-transition-glitch {
 .project-card {
     transition: transform 0.1s ease, box-shadow 0.3s ease;
     transform-style: preserve-3d;
+}
+
+/* Terminal Light Theme Overrides */
+html[data-theme="light"] .terminal-window {
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+html[data-theme="light"] .terminal-header {
+    background-color: #e0e0e0;
+    border-bottom: 1px solid #ccc;
+}
+html[data-theme="light"] .terminal-title {
+    color: #555;
+}
+html[data-theme="light"] .terminal-body {
+    color: #333;
+}
+html[data-theme="light"] .terminal-input-line input {
+    color: #333;
+    text-shadow: none;
+}
+html[data-theme="light"] .terminal-input-line .prompt {
+    color: #0066cc;
+    font-weight: bold;
+}
+html[data-theme="light"] .highlight-cmd {
+    color: #cc0066;
 }
