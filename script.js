@@ -1,3 +1,4 @@
+if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; window.scrollTo(0, 0); }
 document.addEventListener('DOMContentLoaded', () => {
     
     // --- 1. Typewriter Effect ---
@@ -452,6 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const windowHeight = window.innerHeight || document.documentElement.clientHeight;
         const docHeight = totalHeight - windowHeight;
 
+        const docHeight = totalHeight - window.innerHeight;
         const scrollPercent = (scrollTop / docHeight) * 100;
         if (scrollProgress) {
             scrollProgress.style.width = scrollPercent + '%';
@@ -465,6 +467,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (terminalInput) {
         terminalInput.addEventListener('input', () => {
+            if (!isMuted) {
+                playBeep(800 + Math.random() * 400, 'square', 0.02);
+            }
+
             playBeep(400 + Math.random() * 100, 'square', 0.02);
         });
         terminalInput.addEventListener('keydown', function(e) {
