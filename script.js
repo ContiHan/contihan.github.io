@@ -452,8 +452,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalHeight = Math.max(bodyScroll, docScroll);
         const windowHeight = window.innerHeight || document.documentElement.clientHeight;
         const docHeight = totalHeight - windowHeight;
-
-        const docHeight = totalHeight - window.innerHeight;
         const scrollPercent = (scrollTop / docHeight) * 100;
         if (scrollProgress) {
             scrollProgress.style.width = scrollPercent + '%';
