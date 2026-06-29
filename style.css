@@ -1373,8 +1373,16 @@ html[data-theme="light"] #scroll-progress {
 
 /* Matrix Easter Egg Overlay */
 .matrix-mode-active {
-    filter: sepia(1) hue-rotate(90deg) saturate(3) brightness(0.6);
+    background-color: #001a00 !important;
+    filter: sepia(1) hue-rotate(90deg) saturate(3);
     pointer-events: none;
+}
+.matrix-mode-active * {
+    background-color: transparent !important;
+    color: #00ff00 !important;
+    border-color: #00ff00 !important;
+    text-shadow: 0 0 5px #00ff00 !important;
+    box-shadow: none !important;
 }
 
 @media (max-width: 768px) {
