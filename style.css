@@ -140,10 +140,12 @@ ul {
     border: 1px solid var(--border-color);
 }
 
+@media (hover: hover) {
 .theme-toggle:hover {
     transform: scale(1.1) rotate(15deg);
     background: var(--accent-color);
     color: var(--bg-color);
+}
 }
 
 /* =========================================
@@ -1190,10 +1192,12 @@ body.theme-transition-glitch {
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
 }
+@media (hover: hover) {
 .audio-toggle:hover {
     transform: scale(1.1) rotate(15deg);
     background: var(--accent-color);
     color: var(--bg-color);
+}
 }
 @media (max-width: 768px) {
     .audio-toggle {
@@ -1362,19 +1366,15 @@ html[data-theme="light"] #scroll-progress {
 
 /* Cyberpunk Cursors */
 @media (pointer: fine) {
-    body, html { cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjMDBmZmNjIiBzdHJva2U9IiMwMGZmZmYiIHN0cm9rZS13aWR0aD0iMSIgZD0iTTQsMiBMMTgsMTAgTDExLDEzIEwxNSwyMSBMMTIsMjIgTDgsMTQgTDIsMTggWiIvPjwvc3ZnPg==") 4 2, auto !important; }
+    body, html { cursor: url('cursor-default.svg') 4 2, auto !important; }
+    a, button, .theme-toggle, .audio-toggle, .btn, .project-card, input[type="button"], input[type="submit"] { cursor: url('cursor-pointer.svg') 9 2, pointer !important; }
+    .terminal-window, .terminal-window * { cursor: url('cursor-text.svg') 12 12, text !important; }
+}
     a, button, .theme-toggle, .audio-toggle, .btn, .project-card, input[type="button"], input[type="submit"] { cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjZmYwMGZmIiBzdHJva2U9IiNmZjAwZmYiIHN0cm9rZS13aWR0aD0iMSIgZD0iTTkgMnY0aC00djRoLTR2MTBoNHY0aDR2LTRoMTR2LTE0aC0xNHYtNHogTTExIDRoMTB2MTBoLTEwdi0xMHoiLz48L3N2Zz4=") 9 2, pointer !important; }
     input[type="text"], .terminal-input-line, p, h1, h2, h3, span { cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cmVjdCBmaWxsPSIjMDBmZmNjIiB4PSIxMSIgeT0iMiIgd2lkdGg9IjIiIGhlaWdodD0iMjAiLz48cmVjdCBmaWxsPSIjMDBmZmNjIiB4PSI4IiB5PSIyIiB3aWR0aD0iOCIgaGVpZ2h0PSIyIi8+PHJlY3QgZmlsbD0iIzAwZmZjYyIgeD0iOCIgeT0iMjAiIHdpZHRoPSI4IiBoZWlnaHQ9IjIiLz48L3N2Zz4=") 12 12, text !important; }
 }
 
-/* Mobile hover fix */
-@media (hover: none) {
-    .btn:hover, .project-card:hover, .theme-toggle:hover, .audio-toggle:hover {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-    .theme-toggle, .audio-toggle { background: var(--surface-color) !important; color: var(--text-primary) !important; }
-}
+
 
 /* Matrix Easter Egg Overlay */
 .matrix-mode-active {
