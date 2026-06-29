@@ -435,52 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- 8. Custom Cursor & Trail ---
-    const cursor = document.querySelector('.custom-cursor');
-    const trail = document.querySelector('.cursor-trail');
-    
-    let mouseX = 0, mouseY = 0;
-    let trailX = 0, trailY = 0;
-
-    
-    document.addEventListener('pointermove', function mouseDetector(e) {
-        if (e.pointerType === 'mouse') {
-            document.body.classList.add('has-mouse');
-            document.removeEventListener('pointermove', mouseDetector);
-        }
-    });
-    
-    document.addEventListener('pointermove', (e) => {
-        if (e.pointerType !== 'mouse') return;
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        
-        // Move immediate cursor instantly
-        if (cursor) {
-            cursor.style.left = mouseX + 'px';
-            cursor.style.top = mouseY + 'px';
-        }
-    });
-
-        // Animation loop for trail
-        function animateTrail() {
-            trailX += (mouseX - trailX) * 0.2; // ease factor
-            trailY += (mouseY - trailY) * 0.2;
-            if (trail) {
-                trail.style.left = trailX + 'px';
-                trail.style.top = trailY + 'px';
-            }
-            requestAnimationFrame(animateTrail);
-        }
-        animateTrail();
-
-    // Hover effects
-    document.querySelectorAll('a, button, input, .project-card, .btn').forEach(el => {
-        el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-        el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-    });
-
-
     // --- 9. Scroll Progress Bar ---
     const scrollProgress = document.getElementById('scroll-progress');
     window.addEventListener('scroll', () => {
@@ -659,29 +613,85 @@ document.addEventListener('DOMContentLoaded', () => {
     }, {passive: true});
 
     
-    function triggerKonami() {
-        playBeep(200, 'sawtooth', 0.5);
-        playBeep(400, 'sawtooth', 0.5, 0.5);
-        playBeep(600, 'sawtooth', 0.5, 1.0);
-        
-        document.body.classList.add('konami-active');
-        
-        // Let it glitch for 3 seconds then recover
-        setTimeout(() => {
-            document.body.classList.remove('konami-active');
-        }, 3000);
-    }
     
+    function triggerKonami() {
+        document.body.style.overflow = 'hidden';
+        
+        // Play 8-bit crash sounds
+        let pitch = 150;
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                playBeep(pitch, 'sawtooth', 0.2);
+                pitch -= 20;
+            }, i * 200);
+        }
+        
+        const crashOverlay = document.createElement('div');
+        crashOverlay.style.position = 'fixed';
+        crashOverlay.style.top = '0';
+        crashOverlay.style.left = '0';
+        crashOverlay.style.width = '100vw';
+        crashOverlay.style.height = '100vh';
+        crashOverlay.style.zIndex = '9999999';
+        crashOverlay.style.pointerEvents = 'none';
+        document.body.appendChild(crashOverlay);
+        
+        const blocks = 5;
+        const blockHeight = 100 / blocks;
+        const blockEls = [];
+        
+        // Pixelate down
+        for (let i = 0; i < blocks; i++) {
+            setTimeout(() => {
+                const block = document.createElement('div');
+                block.style.position = 'absolute';
+                block.style.top = (i * blockHeight) + 'vh';
+                block.style.left = '0';
+                block.style.width = '100vw';
+                block.style.height = blockHeight + 'vh';
+                block.style.backgroundColor = (i % 2 === 0) ? '#000' : '#111';
+                // Add noise effect via bg image or just color
+                block.style.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,255,0,0.1) 10px, rgba(0,255,0,0.1) 20px)';
+                crashOverlay.appendChild(block);
+                blockEls.push(block);
+            }, i * 200);
+        }
+        
+        // Pixelate up (remove)
+        setTimeout(() => {
+            let pitchUp = 50;
+            for (let i = 0; i < blocks; i++) {
+                setTimeout(() => {
+                    playBeep(pitchUp, 'square', 0.1);
+                    pitchUp += 30;
+                    if (blockEls.length > 0) {
+                        const b = blockEls.pop();
+                        b.remove();
+                    }
+                }, i * 150);
+            }
+            
+            // Cleanup
+            setTimeout(() => {
+                crashOverlay.remove();
+                document.body.style.overflow = '';
+            }, blocks * 150 + 100);
+            
+        }, blocks * 200 + 1000);
+    }
+
     // Matrix Easter Egg for Terminal
     function triggerMatrix() {
         playBeep(300, 'square', 1.0);
+        document.body.classList.add('matrix-mode-active');
+        document.body.style.overflow = 'hidden';
+        
         const overlay = document.createElement('div');
         overlay.style.position = 'fixed';
         overlay.style.top = '0';
         overlay.style.left = '0';
         overlay.style.width = '100vw';
         overlay.style.height = '100vh';
-        overlay.style.backgroundColor = 'black';
         overlay.style.zIndex = '9999999';
         
         const canvas = document.createElement('canvas');
@@ -689,34 +699,53 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.height = window.innerHeight;
         canvas.style.display = 'block';
         overlay.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
+        document.body.appendChild(overlay);
         
+        const ctx = canvas.getContext('2d');
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%""\'#&_(),.;:?!\\|{}<>[]^~'.split('');
         const fontSize = 16;
         const columns = canvas.width / fontSize;
         const drops = [];
         for(let x = 0; x < columns; x++) drops[x] = 1;
         
+        let stopping = false;
+        
         const matrixInterval = setInterval(() => {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#0F0';
             ctx.font = fontSize + 'px monospace';
+            
+            let allDropped = true;
             for(let i = 0; i < drops.length; i++) {
-                const text = chars[Math.floor(Math.random() * chars.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
+                if (drops[i] !== -1) {
+                    allDropped = false;
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if (stopping) {
+                        if (drops[i] * fontSize > canvas.height) {
+                            drops[i] = -1; // mark as done
+                        } else {
+                            drops[i]++;
+                        }
+                    } else {
+                        if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                        drops[i]++;
+                    }
+                }
+            }
+            if (stopping && allDropped) {
+                clearInterval(matrixInterval);
+                overlay.remove();
+                document.body.classList.remove('matrix-mode-active');
+                document.body.style.overflow = '';
             }
         }, 33);
         
-        // Allow user to click to dismiss
-        overlay.style.cursor = 'pointer';
-        overlay.addEventListener('click', () => {
-            clearInterval(matrixInterval);
-            overlay.remove();
-        });
-        document.body.appendChild(overlay);
+        // Stop generating new drops after 5 seconds
+        setTimeout(() => {
+            stopping = true;
+        }, 5000);
     }
-
 });
