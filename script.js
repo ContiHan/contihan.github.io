@@ -517,6 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     printTerminalLine('Redirecting to sector 03...');
                     setTimeout(() => document.getElementById('projects').scrollIntoView({behavior: 'smooth'}), 500);
                     break;
+                case 'hack':
                 case 'matrix':
                     printTerminalLine('Initializing Matrix protocol...');
                     setTimeout(triggerMatrix, 1000);
@@ -625,6 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     
     function triggerKonami() {
+        document.body.classList.add('konami-active');
         document.body.style.overflow = 'hidden';
         
         // Play 8-bit crash sounds
@@ -684,6 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Cleanup
             setTimeout(() => {
                 crashOverlay.remove();
+                document.body.classList.remove('konami-active');
                 document.body.style.overflow = '';
             }, blocks * 150 + 100);
             
@@ -703,7 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.width = '100vw';
         overlay.style.height = '100vh';
         overlay.style.zIndex = '9999999';
-        overlay.style.mixBlendMode = 'screen'; // This makes the black background of canvas transparent, revealing the green website behind it!
+        overlay.style.pointerEvents = 'none'; // IMPORTANT so it doesn't block scrolling/clicks if we want them
         
         const canvas = document.createElement('canvas');
         canvas.width = window.innerWidth;
@@ -722,8 +725,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let stopping = false;
         
         const matrixInterval = setInterval(() => {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'source-over';
             ctx.fillStyle = '#0F0';
             ctx.font = fontSize + 'px monospace';
             
