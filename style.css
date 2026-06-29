@@ -1370,9 +1370,7 @@ html[data-theme="light"] #scroll-progress {
     a, button, .theme-toggle, .audio-toggle, .btn, .project-card, input[type="button"], input[type="submit"] { cursor: url('cursor-pointer.svg') 9 2, pointer !important; }
     .terminal-window, .terminal-window * { cursor: url('cursor-text.svg') 12 12, text !important; }
 }
-    a, button, .theme-toggle, .audio-toggle, .btn, .project-card, input[type="button"], input[type="submit"] { cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjZmYwMGZmIiBzdHJva2U9IiNmZjAwZmYiIHN0cm9rZS13aWR0aD0iMSIgZD0iTTkgMnY0aC00djRoLTR2MTBoNHY0aDR2LTRoMTR2LTE0aC0xNHYtNHogTTExIDRoMTB2MTBoLTEwdi0xMHoiLz48L3N2Zz4=") 9 2, pointer !important; }
-    input[type="text"], .terminal-input-line, p, h1, h2, h3, span { cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cmVjdCBmaWxsPSIjMDBmZmNjIiB4PSIxMSIgeT0iMiIgd2lkdGg9IjIiIGhlaWdodD0iMjAiLz48cmVjdCBmaWxsPSIjMDBmZmNjIiB4PSI4IiB5PSIyIiB3aWR0aD0iOCIgaGVpZ2h0PSIyIi8+PHJlY3QgZmlsbD0iIzAwZmZjYyIgeD0iOCIgeT0iMjAiIHdpZHRoPSI4IiBoZWlnaHQ9IjIiLz48L3N2Zz4=") 12 12, text !important; }
-}
+    
 
 
 
