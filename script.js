@@ -699,6 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.width = '100vw';
         overlay.style.height = '100vh';
         overlay.style.zIndex = '9999999';
+        overlay.style.mixBlendMode = 'screen'; // This makes the black background of canvas transparent, revealing the green website behind it!
         
         const canvas = document.createElement('canvas');
         canvas.width = window.innerWidth;
