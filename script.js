@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function processCommand(cmd) {
             switch(cmd) {
                 case 'help':
-                    printTerminalLine('Available commands: <br> - <span class="highlight-cmd">whoami</span>: Display user info<br> - <span class="highlight-cmd">skills</span>: List technical stack<br> - <span class="highlight-cmd">clear</span>: Clear terminal<br> - <span class="highlight-cmd">projects</span>: Jump to projects<br> - <span class="highlight-cmd">hack</span>: ???<br> - <span class="highlight-cmd">matrix</span>: ???');
+                    printTerminalLine('Available commands: <br> - <span class="highlight-cmd">whoami</span>: Display user info<br> - <span class="highlight-cmd">skills</span>: List technical stack<br> - <span class="highlight-cmd">clear</span>: Clear terminal<br> - <span class="highlight-cmd">projects</span>: Jump to projects<br> - <span class="highlight-cmd">secret</span>: 🤫');
                     break;
                 case 'whoami':
                     printTerminalLine('404: Human not found. Running Daniel.exe...<br>I am Daniel Hanák, a QA, Performance, and Security Engineer obsessed with Data Science and AI models.');
@@ -457,6 +457,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'projects':
                     printTerminalLine('Redirecting to sector 03...');
                     setTimeout(() => document.getElementById('projects').scrollIntoView({behavior: 'smooth'}), 500);
+                    break;
+                case 'secret':
+                    printTerminalLine('🔓 <span class="highlight-cmd">Hidden protocols detected:</span><br><br>► Type <span class="highlight-cmd">hack</span> or <span class="highlight-cmd">matrix</span> to initiate the Matrix protocol<br>► Enter the <span class="highlight-cmd">Konami Code</span> (↑↑↓↓←→←→BA) for a system glitch<br>► Tap the avatar <span class="highlight-cmd">5×</span> rapidly for a surprise');
                     break;
                 case 'hack':
                 case 'matrix':
