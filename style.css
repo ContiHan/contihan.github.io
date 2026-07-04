@@ -1208,17 +1208,6 @@ body.theme-transition-glitch {
     }
 }
 
-/* Custom Cursor */
-
-
-
-
-
-    
-    
-    body.cursor-hover 
-    body.cursor-hover 
-
 /* Terminal Section */
 .terminal-section {
     padding: 2rem 0;
@@ -1374,7 +1363,6 @@ html[data-theme="light"] #scroll-progress {
 /* Matrix Easter Egg Overlay */
 .matrix-mode-active {
     background-color: #001100 !important;
-    pointer-events: none;
 }
 .matrix-mode-active * {
     background-color: transparent !important;
