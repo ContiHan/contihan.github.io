@@ -650,9 +650,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 15. Konami Code Glitch Effect
     // ===========================================
     function triggerKonami() {
+        // Brief glitch burst (500ms), then stop shaking
         document.body.classList.add('konami-active');
+        setTimeout(() => {
+            document.body.classList.remove('konami-active');
+        }, 500);
+
         document.body.style.overflow = 'hidden';
 
+        // 8-bit crash sounds
         let pitch = 150;
         for (let i = 0; i < 5; i++) {
             setTimeout(() => {
@@ -669,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const blockHeight = 100 / blocks;
         const blockEls = [];
 
-        // Pixelate down
+        // Pixelate down — blocks slide in from top
         for (let i = 0; i < blocks; i++) {
             setTimeout(() => {
                 const block = document.createElement('div');
@@ -682,10 +688,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 block.style.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,255,0,0.1) 10px, rgba(0,255,0,0.1) 20px)';
                 crashOverlay.appendChild(block);
                 blockEls.push(block);
+                playBeep(100 + i * 40, 'square', 0.08);
             }, i * 200);
         }
 
-        // Pixelate up (remove)
+        // Pixelate up — blocks removed from bottom
         setTimeout(() => {
             let pitchUp = 50;
             for (let i = 0; i < blocks; i++) {
@@ -699,9 +706,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, i * 150);
             }
 
+            // Cleanup
             setTimeout(() => {
                 crashOverlay.remove();
-                document.body.classList.remove('konami-active');
                 document.body.style.overflow = '';
             }, blocks * 150 + 100);
 
