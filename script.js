@@ -459,10 +459,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => document.getElementById('projects').scrollIntoView({behavior: 'smooth'}), 500);
                     break;
                 case 'secret':
-                    printTerminalLine('🔓 <span class="highlight-cmd">Hidden protocols detected:</span><br><br>► Type <span class="highlight-cmd">hack</span> or <span class="highlight-cmd">matrix</span> to initiate the Matrix protocol<br>► Enter the <span class="highlight-cmd">Konami Code</span> (↑↑↓↓←→←→BA) for a system glitch<br>► Tap the avatar <span class="highlight-cmd">5×</span> rapidly for a surprise');
+                    printTerminalLine('🔓 <span class="highlight-cmd">Hidden protocols detected:</span><br><br>► Type <span class="highlight-cmd">hack</span> to initiate the Matrix protocol<br>► Enter the <span class="highlight-cmd">Konami Code</span> (↑↑↓↓←→←→BA) for a system glitch<br>► Tap the avatar <span class="highlight-cmd">5×</span> rapidly for a surprise');
                     break;
                 case 'hack':
-                case 'matrix':
                     printTerminalLine('Initializing Matrix protocol...');
                     setTimeout(activateMatrix, 1000);
                     break;
@@ -576,15 +575,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('matrix-overlay')) return;
 
         playBeep(300, 'square', 1.0);
-
-        // Apply green theme to the whole page
-        document.body.classList.add('matrix-mode-active');
         document.body.style.overflow = 'hidden';
 
-        // Create overlay with canvas
+        // Phase 1: Smooth transition to green (1s)
+        document.body.classList.add('matrix-mode-active');
+
+        // Create overlay with canvas (hidden at first)
         const overlay = document.createElement('div');
         overlay.id = 'matrix-overlay';
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999999;pointer-events:none;';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999999;pointer-events:none;opacity:0;transition:opacity 0.5s ease;';
 
         const canvas = document.createElement('canvas');
         canvas.width = window.innerWidth;
@@ -602,50 +601,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let stopping = false;
 
-        const matrixInterval = setInterval(() => {
-            // Fade old characters by drawing semi-transparent black
-            ctx.fillStyle = 'rgba(0, 17, 0, 0.15)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Phase 2: Start rain after green transition settles (1s delay)
+        setTimeout(() => {
+            overlay.style.opacity = '1';
 
-            ctx.fillStyle = '#0F0';
-            ctx.font = fontSize + 'px monospace';
+            const matrixInterval = setInterval(() => {
+                ctx.fillStyle = 'rgba(0, 17, 0, 0.15)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            let allDropped = true;
-            for (let i = 0; i < drops.length; i++) {
-                if (drops[i] !== -1) {
-                    allDropped = false;
-                    const text = chars[Math.floor(Math.random() * chars.length)];
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                ctx.fillStyle = '#0F0';
+                ctx.font = fontSize + 'px monospace';
 
-                    if (stopping) {
-                        // Let each column finish falling off screen
-                        if (drops[i] * fontSize > canvas.height) {
-                            drops[i] = -1; // done
+                let allDropped = true;
+                for (let i = 0; i < drops.length; i++) {
+                    if (drops[i] !== -1) {
+                        allDropped = false;
+                        const text = chars[Math.floor(Math.random() * chars.length)];
+                        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                        if (stopping) {
+                            if (drops[i] * fontSize > canvas.height) {
+                                drops[i] = -1;
+                            } else {
+                                drops[i]++;
+                            }
                         } else {
+                            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                                drops[i] = 0;
+                            }
                             drops[i]++;
                         }
-                    } else {
-                        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                            drops[i] = 0;
-                        }
-                        drops[i]++;
                     }
                 }
-            }
 
-            // All columns finished — clean up
-            if (stopping && allDropped) {
-                clearInterval(matrixInterval);
-                overlay.remove();
-                document.body.classList.remove('matrix-mode-active');
-                document.body.style.overflow = '';
-            }
-        }, 33);
+                // Phase 3: All rain finished — smooth transition back
+                if (stopping && allDropped) {
+                    clearInterval(matrixInterval);
+                    overlay.style.opacity = '0';
+                    // Wait for canvas fade, then remove green
+                    setTimeout(() => {
+                        overlay.remove();
+                        document.body.classList.remove('matrix-mode-active');
+                        document.body.style.overflow = '';
+                    }, 1000);
+                }
+            }, 33);
 
-        // Stop generating new drops after 5 seconds
-        setTimeout(() => {
-            stopping = true;
-        }, 5000);
+            // Stop generating new drops after 5 seconds
+            setTimeout(() => {
+                stopping = true;
+            }, 5000);
+        }, 1000);
     }
 
 
@@ -653,12 +659,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 15. Konami Code Glitch Effect
     // ===========================================
     function triggerKonami() {
-        // Brief glitch burst (500ms), then stop shaking
-        document.body.classList.add('konami-active');
-        setTimeout(() => {
-            document.body.classList.remove('konami-active');
-        }, 500);
-
         document.body.style.overflow = 'hidden';
 
         // 8-bit crash sounds
