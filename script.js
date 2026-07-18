@@ -1,19 +1,22 @@
 /* ===========================================
    Prevent scroll restoration on refresh
+   (skipped for hash deep links like /#projects)
 =========================================== */
-if ('scrollRestoration' in history) {
+if ('scrollRestoration' in history && !location.hash) {
     history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     // ===========================================
     // 1. Typewriter Effect
     // ===========================================
     const typewriterElement = document.getElementById('typewriter');
     const texts = [
-        "Analyzing data via statistics...",
+        "Running statistical analysis...",
         "Searching for security vulnerabilities...",
         "Executing performance tests...",
         "May the Force be with you."
@@ -51,7 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(typeWriter, typingSpeed);
     }
 
-    setTimeout(typeWriter, 1000);
+    if (prefersReducedMotion) {
+        typewriterElement.textContent = texts[0];
+    } else {
+        setTimeout(typeWriter, 1000);
+    }
 
 
     // ===========================================
@@ -92,29 +99,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        htmlElement.setAttribute('data-theme', savedTheme);
-        updateIcon(savedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-        updateIcon('light');
-    } else {
-        updateIcon('dark');
-    }
+    // Theme attribute is already set pre-paint by the inline script in <head>;
+    // here we only sync the icon with it.
+    updateIcon(htmlElement.getAttribute('data-theme') || 'dark');
 
+    let themeFlashTimeout;
     themeToggleBtn.addEventListener('click', () => {
         const currentTheme = htmlElement.getAttribute('data-theme') || 'dark';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
         htmlElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+        try {
+            localStorage.setItem('theme', newTheme);
+        } catch (e) { /* storage unavailable */ }
         updateIcon(newTheme);
 
-        // Quick glitch effect on theme switch
-        document.body.classList.add('konami-active');
-        setTimeout(() => {
-            document.body.classList.remove('konami-active');
-        }, 500);
+        // Gentle flash on theme switch (no strobe — photosensitivity-safe)
+        if (!prefersReducedMotion) {
+            clearTimeout(themeFlashTimeout);
+            document.body.classList.remove('theme-flash');
+            void document.body.offsetWidth; // restart animation
+            document.body.classList.add('theme-flash');
+            themeFlashTimeout = setTimeout(() => {
+                document.body.classList.remove('theme-flash');
+            }, 500);
+        }
 
         playBeep(200, 'sawtooth', 0.2);
     });
@@ -145,24 +154,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let isMuted = true; // start muted (browser autoplay policy)
 
     const initAudio = () => {
+        // Creating (and resuming) the context on the first user gesture
+        // unlocks audio on mobile browsers.
         if (!audioContext) {
             audioContext = new AudioContextClass();
         }
-        playBeep(20000, 'sine', 0.001); // inaudible warmup
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
     };
     document.addEventListener('pointerdown', initAudio, { once: true });
     document.addEventListener('keydown', initAudio, { once: true });
 
     const audioToggleBtn = document.getElementById('audio-toggle');
-    const audioIcon = audioToggleBtn.querySelector('i');
 
     if (audioToggleBtn) {
+        const audioIcon = audioToggleBtn.querySelector('i');
         audioToggleBtn.addEventListener('click', () => {
             if (!audioContext) {
                 audioContext = new AudioContextClass();
             }
 
             isMuted = !isMuted;
+            audioToggleBtn.setAttribute('aria-pressed', String(!isMuted));
             if (isMuted) {
                 audioIcon.classList.remove('fa-volume-up');
                 audioIcon.classList.add('fa-volume-mute');
@@ -198,10 +212,16 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.stop(audioContext.currentTime + delay + duration);
     }
 
-    // Hover sounds on links/buttons
-    document.querySelectorAll('a, button, .btn').forEach(el => {
-        el.addEventListener('mouseenter', () => playBeep(800, 'sine', 0.05));
-    });
+    // Hover sounds on links/buttons — delegated, so dynamically added
+    // elements (GitHub cards) get them too; mouse-only devices only.
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('a, button');
+            if (el && (!e.relatedTarget || !el.contains(e.relatedTarget))) {
+                playBeep(800, 'sine', 0.05);
+            }
+        });
+    }
 
 
     // ===========================================
@@ -215,14 +235,18 @@ document.addEventListener('DOMContentLoaded', () => {
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('active');
             navLinks.classList.toggle('active');
-            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : 'auto';
+            const isOpen = navLinks.classList.contains('active');
+            hamburger.setAttribute('aria-expanded', String(isOpen));
+            // Restore to '' (not 'auto') so the stylesheet's overflow-x: hidden survives
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 hamburger.classList.remove('active');
                 navLinks.classList.remove('active');
-                document.body.style.overflow = 'auto';
+                hamburger.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
             });
         });
     }
@@ -238,6 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (glitchContainer && realProfile && pixelProfile) {
         let isPixel = false;
         let autoGlitchInterval;
+        let autoRevertTimeout;
         let interactionTimeout;
 
         const setPixelState = (pixel) => {
@@ -256,11 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const startAutoCycle = () => {
+            if (prefersReducedMotion) return;
             clearInterval(autoGlitchInterval);
             autoGlitchInterval = setInterval(() => {
                 if (!isPixel) {
                     setPixelState(true);
-                    setTimeout(() => {
+                    autoRevertTimeout = setTimeout(() => {
                         if (isPixel) setPixelState(false);
                     }, 3000);
                 }
@@ -269,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const suspendAutoCycle = () => {
             clearInterval(autoGlitchInterval);
+            clearTimeout(autoRevertTimeout);
             clearTimeout(interactionTimeout);
             interactionTimeout = setTimeout(() => {
                 setPixelState(false);
@@ -279,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         glitchContainer.addEventListener('pointerenter', (e) => {
             if (e.pointerType === 'mouse') {
                 clearInterval(autoGlitchInterval);
+                clearTimeout(autoRevertTimeout);
                 clearTimeout(interactionTimeout);
                 setPixelState(true);
             }
@@ -325,6 +353,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let konamiIndex = 0;
 
     document.addEventListener('keydown', (e) => {
+        // Ignore keystrokes while typing in a form field (e.g. the terminal input),
+        // otherwise typing "hack" there would fire the sequence mid-word.
+        if (e.target.matches('input, textarea')) return;
+
         // Hack sequence
         if (e.key.toLowerCase() === hackSequence[hackIndex]) {
             hackIndex++;
@@ -344,7 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 konamiIndex = 0;
             }
         } else {
-            konamiIndex = 0;
+            // Mismatch may still start a new sequence (e.g. a third ArrowUp)
+            konamiIndex = (e.key === konamiCode[0]) ? 1 : 0;
         }
     });
 
@@ -393,18 +426,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // 9. Scroll Progress Bar
     // ===========================================
     const scrollProgress = document.getElementById('scroll-progress');
+    let scrollTicking = false;
     window.addEventListener('scroll', () => {
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        const bodyScroll = document.body.scrollHeight || 0;
-        const docScroll = document.documentElement.scrollHeight || 0;
-        const totalHeight = Math.max(bodyScroll, docScroll);
-        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-        const docHeight = totalHeight - windowHeight;
-        const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-        if (scrollProgress) {
-            scrollProgress.style.width = scrollPercent + '%';
-        }
-    });
+        if (scrollTicking) return;
+        scrollTicking = true;
+        // rAF batches the layout reads so scrolling stays smooth
+        requestAnimationFrame(() => {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const totalHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+            const docHeight = totalHeight - window.innerHeight;
+            const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            if (scrollProgress) {
+                scrollProgress.style.width = scrollPercent + '%';
+            }
+            scrollTicking = false;
+        });
+    }, { passive: true });
 
 
     // ===========================================
@@ -424,23 +461,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cmd = this.value.trim().toLowerCase();
                 this.value = '';
 
-                printTerminalLine(`<span class="prompt">contihan@mainframe:~$</span> ${cmd}`);
+                echoCommand(cmd);
                 processCommand(cmd);
                 terminalBody.scrollTop = terminalBody.scrollHeight;
                 playBeep(300, 'square', 0.1);
             }
         });
 
-        function printTerminalLine(html) {
-            const div = document.createElement('div');
-            div.className = 'terminal-line';
-            div.innerHTML = html;
+        function insertTerminalLine(div) {
             const inputLine = document.querySelector('.terminal-input-line');
             if (inputLine) {
                 terminalBody.insertBefore(div, inputLine);
             } else {
                 terminalBody.appendChild(div);
             }
+        }
+
+        // For trusted, hardcoded HTML only — never user input
+        function printTerminalLine(html) {
+            const div = document.createElement('div');
+            div.className = 'terminal-line';
+            div.innerHTML = html;
+            insertTerminalLine(div);
+        }
+
+        // Echoes user input safely as plain text (no innerHTML)
+        function echoCommand(cmd) {
+            const div = document.createElement('div');
+            div.className = 'terminal-line';
+            const prompt = document.createElement('span');
+            prompt.className = 'prompt';
+            prompt.textContent = 'contihan@mainframe:~$';
+            div.appendChild(prompt);
+            div.appendChild(document.createTextNode(' ' + cmd));
+            insertTerminalLine(div);
+        }
+
+        // Plain-text output for strings that may contain user input
+        function printTerminalText(text) {
+            const div = document.createElement('div');
+            div.className = 'terminal-line';
+            div.textContent = text;
+            insertTerminalLine(div);
         }
 
         function processCommand(cmd) {
@@ -459,20 +521,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => document.getElementById('projects').scrollIntoView({behavior: 'smooth'}), 500);
                     break;
                 case 'secret':
-                    printTerminalLine('🔓 <span class="highlight-cmd">Hidden protocols detected:</span><br><br>► Type <span class="highlight-cmd">hack</span> to initiate the Matrix protocol<br>► Enter the <span class="highlight-cmd">Konami Code</span> (↑↑↓↓←→←→BA) for a system glitch<br>► Tap the avatar <span class="highlight-cmd">5×</span> rapidly for a surprise');
+                    printTerminalLine('🔓 <span class="highlight-cmd">Hidden protocols detected:</span><br><br>► Type <span class="highlight-cmd">hack</span> to initiate the Matrix protocol<br>► Enter the <span class="highlight-cmd">Konami Code</span> (↑↑↓↓←→←→BA — or swipe ↑↑↓↓←→←→ on mobile) for a system glitch<br>► Tap the avatar <span class="highlight-cmd">5×</span> rapidly for a surprise');
                     break;
                 case 'hack':
                     printTerminalLine('Initializing Matrix protocol...');
                     setTimeout(activateMatrix, 1000);
                     break;
-                case 'clear':
+                case 'clear': {
                     const lines = terminalBody.querySelectorAll('.terminal-line:not(.terminal-input-line)');
                     lines.forEach(l => l.remove());
                     break;
+                }
                 case '':
                     break;
                 default:
-                    printTerminalLine(`Command not found: ${cmd}. Type 'help' for available commands.`);
+                    printTerminalText(`Command not found: ${cmd}. Type 'help' for available commands.`);
             }
         }
 
@@ -492,9 +555,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.project-card');
 
     cards.forEach(card => {
-        card.addEventListener('pointermove', (e) => {
+        let rect = null;
+
+        card.addEventListener('pointerenter', (e) => {
             if (e.pointerType !== 'mouse') return;
-            const rect = card.getBoundingClientRect();
+            // Cache the untransformed box once per hover instead of forcing
+            // layout on every pointermove
+            rect = card.getBoundingClientRect();
+        });
+
+        card.addEventListener('pointermove', (e) => {
+            if (e.pointerType !== 'mouse' || !rect) return;
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
@@ -508,6 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         card.addEventListener('mouseleave', () => {
+            rect = null;
             card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
         });
     });
@@ -516,45 +588,92 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     // 12. Fetch GitHub Repos
     // ===========================================
+    const renderGithubRepos = (repos, reposContainer) => {
+        reposContainer.innerHTML = '';
+
+        repos.forEach(repo => {
+            const card = document.createElement('div');
+            card.className = 'github-card';
+
+            // API data is built as DOM nodes with textContent (no innerHTML)
+            const heading = document.createElement('h4');
+            const link = document.createElement('a');
+            link.href = repo.html_url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = repo.name;
+            heading.appendChild(link);
+
+            const desc = document.createElement('p');
+            desc.textContent = repo.description || '[UNKNOWN]';
+
+            const stats = document.createElement('div');
+            stats.className = 'github-stats';
+
+            const addStat = (iconClass, text) => {
+                const span = document.createElement('span');
+                const icon = document.createElement('i');
+                icon.className = iconClass;
+                icon.setAttribute('aria-hidden', 'true');
+                span.appendChild(icon);
+                span.appendChild(document.createTextNode(' ' + text));
+                stats.appendChild(span);
+            };
+
+            const updatedDate = new Date(repo.pushed_at || repo.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const sizeInKb = repo.size;
+            const sizeText = sizeInKb > 1024 ? (sizeInKb / 1024).toFixed(1) + ' MB' : sizeInKb + ' KB';
+
+            addStat('fas fa-clock', updatedDate);
+            addStat('fas fa-hdd', sizeText);
+            if (repo.language) addStat('fas fa-code', repo.language);
+            if (repo.stargazers_count > 0) addStat('fas fa-star', repo.stargazers_count);
+            if (repo.forks_count > 0) addStat('fas fa-code-branch', repo.forks_count);
+
+            card.appendChild(heading);
+            card.appendChild(desc);
+            card.appendChild(stats);
+            reposContainer.appendChild(card);
+        });
+    };
+
     const fetchGithubRepos = async () => {
         const reposContainer = document.getElementById('github-repos');
         if (!reposContainer) return;
+
+        const CACHE_KEY = 'github-repos-cache';
+        const CACHE_TTL = 60 * 60 * 1000; // 1 hour — softens the 60 req/h unauthenticated limit
+
+        try {
+            const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY));
+            if (cached && Date.now() - cached.time < CACHE_TTL) {
+                renderGithubRepos(cached.repos, reposContainer);
+                return;
+            }
+        } catch (e) { /* bad/absent cache — fetch fresh */ }
 
         try {
             const response = await fetch('https://api.github.com/users/ContiHan/repos?sort=updated&per_page=3');
             if (!response.ok) throw new Error('Network response was not ok');
             const repos = await response.json();
 
-            reposContainer.innerHTML = '';
+            try {
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), repos }));
+            } catch (e) { /* storage unavailable */ }
 
-            repos.forEach(repo => {
-                const card = document.createElement('div');
-                card.className = 'github-card';
-
-                const updatedDate = new Date(repo.pushed_at || repo.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-                const desc = repo.description || '[UNKNOWN]';
-
-                const sizeInKb = repo.size;
-                const sizeText = sizeInKb > 1024 ? (sizeInKb / 1024).toFixed(1) + ' MB' : sizeInKb + ' KB';
-
-                let statsHtml = `<span><i class="fas fa-clock"></i> ${updatedDate}</span>`;
-                statsHtml += `<span><i class="fas fa-hdd"></i> ${sizeText}</span>`;
-                if (repo.language) statsHtml += `<span><i class="fas fa-code"></i> ${repo.language}</span>`;
-                if (repo.stargazers_count > 0) statsHtml += `<span><i class="fas fa-star"></i> ${repo.stargazers_count}</span>`;
-                if (repo.forks_count > 0) statsHtml += `<span><i class="fas fa-code-branch"></i> ${repo.forks_count}</span>`;
-
-                card.innerHTML = `
-                    <h4><a href="${repo.html_url}" target="_blank">${repo.name}</a></h4>
-                    <p>${desc}</p>
-                    <div class="github-stats">
-                        ${statsHtml}
-                    </div>
-                `;
-                reposContainer.appendChild(card);
-            });
+            renderGithubRepos(repos, reposContainer);
         } catch (error) {
             console.error('Error fetching repos:', error);
-            reposContainer.innerHTML = '<p>Failed to load GitHub transmissions.</p>';
+            reposContainer.innerHTML = '';
+            const fallback = document.createElement('p');
+            fallback.appendChild(document.createTextNode('Failed to load GitHub transmissions. '));
+            const profileLink = document.createElement('a');
+            profileLink.href = 'https://github.com/ContiHan?tab=repositories';
+            profileLink.target = '_blank';
+            profileLink.rel = 'noopener noreferrer';
+            profileLink.textContent = 'Browse repositories on GitHub →';
+            fallback.appendChild(profileLink);
+            reposContainer.appendChild(fallback);
         }
     };
 
@@ -585,29 +704,49 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.id = 'matrix-overlay';
         overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999999;pointer-events:none;opacity:0;transition:opacity 0.5s ease;';
 
+        // Device-pixel-ratio-aware canvas — crisp rain on retina/mobile screens
+        const dpr = window.devicePixelRatio || 1;
+        const viewW = window.innerWidth;
+        const viewH = window.innerHeight;
         const canvas = document.createElement('canvas');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        canvas.style.display = 'block';
+        canvas.width = viewW * dpr;
+        canvas.height = viewH * dpr;
+        canvas.style.cssText = 'display:block;width:100%;height:100%;';
         overlay.appendChild(canvas);
         document.body.appendChild(overlay);
 
         const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%"#&_(),.;:?!\\|{}<>[]^~'.split('');
         const fontSize = 16;
-        const columns = Math.floor(canvas.width / fontSize);
+        const columns = Math.floor(viewW / fontSize);
         const drops = [];
         for (let x = 0; x < columns; x++) drops[x] = 1;
 
         let stopping = false;
 
+        // Escape cancels the effect early (rain drains out, then cleans up)
+        const escHandler = (e) => {
+            if (e.key === 'Escape') stopping = true;
+        };
+        document.addEventListener('keydown', escHandler);
+
         // Phase 2: Start rain after green transition settles (1s delay)
         setTimeout(() => {
             overlay.style.opacity = '1';
 
-            const matrixInterval = setInterval(() => {
+            let lastFrame = 0;
+            let rafId;
+
+            const drawFrame = (timestamp) => {
+                if (timestamp - lastFrame < 33) { // ~30 fps
+                    rafId = requestAnimationFrame(drawFrame);
+                    return;
+                }
+                lastFrame = timestamp;
+
                 ctx.fillStyle = 'rgba(0, 17, 0, 0.15)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillRect(0, 0, viewW, viewH);
 
                 ctx.fillStyle = '#0F0';
                 ctx.font = fontSize + 'px monospace';
@@ -620,13 +759,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
                         if (stopping) {
-                            if (drops[i] * fontSize > canvas.height) {
+                            if (drops[i] * fontSize > viewH) {
                                 drops[i] = -1;
                             } else {
                                 drops[i]++;
                             }
                         } else {
-                            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                            if (drops[i] * fontSize > viewH && Math.random() > 0.975) {
                                 drops[i] = 0;
                             }
                             drops[i]++;
@@ -636,7 +775,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Phase 3: All rain finished — smooth transition back
                 if (stopping && allDropped) {
-                    clearInterval(matrixInterval);
+                    cancelAnimationFrame(rafId);
+                    document.removeEventListener('keydown', escHandler);
                     overlay.style.opacity = '0';
                     // Wait for canvas fade, then remove green
                     setTimeout(() => {
@@ -644,8 +784,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.body.classList.remove('matrix-mode-active');
                         document.body.style.overflow = '';
                     }, 1000);
+                    return;
                 }
-            }, 33);
+
+                rafId = requestAnimationFrame(drawFrame);
+            };
+
+            rafId = requestAnimationFrame(drawFrame);
 
             // Stop generating new drops after 5 seconds
             setTimeout(() => {
@@ -659,6 +804,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 15. Konami Code Glitch Effect
     // ===========================================
     function triggerKonami() {
+        // Prevent double-trigger (mirrors activateMatrix)
+        if (document.getElementById('konami-overlay')) return;
+
         document.body.style.overflow = 'hidden';
 
         // 8-bit crash sounds
@@ -671,6 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const crashOverlay = document.createElement('div');
+        crashOverlay.id = 'konami-overlay';
         crashOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999999;pointer-events:none;';
         document.body.appendChild(crashOverlay);
 

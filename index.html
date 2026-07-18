@@ -3,46 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daniel Hanák | ContiHan</title>
-    
+    <title>Daniel Hanák | QA & Performance Engineer (ContiHan)</title>
+
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Personal portfolio of Daniel Hanák (ContiHan). QA, Performance & Security, Data Science enthusiast.">
-    <meta name="keywords" content="Daniel Hanák, ContiHan, QA Engineer, Performance testing, Security, Data Science, Python, JavaScript, .NET, Cyberpunk">
+    <meta name="description" content="Personal portfolio of Daniel Hanák (ContiHan) — QA, Performance & Security Engineer with a passion for Data Science.">
     <meta name="author" content="Daniel Hanák">
-    <meta property="og:title" content="Daniel Hanák | ContiHan">
-    <meta property="og:description" content="Personal portfolio of Daniel Hanák (ContiHan). QA, Performance & Security, Data Science enthusiast.">
+    <meta name="theme-color" content="#050505">
+    <link rel="canonical" href="https://contihan.github.io/">
+    <meta property="og:title" content="Daniel Hanák | QA & Performance Engineer (ContiHan)">
+    <meta property="og:description" content="Personal portfolio of Daniel Hanák (ContiHan) — QA, Performance & Security Engineer with a passion for Data Science.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://contihan.github.io/">
+    <meta property="og:locale" content="en_US">
     <meta property="og:image" content="https://contihan.github.io/assets/profile.png">
-    <meta name="robots" content="index, follow">
+    <meta property="og:image:width" content="640">
+    <meta property="og:image:height" content="640">
+    <meta property="og:image:alt" content="Pixel-art avatar of Daniel Hanák">
+    <meta name="twitter:card" content="summary">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-    
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+    <!-- Apply saved/preferred theme before first paint (prevents theme flash) -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) { /* storage unavailable (private mode) — keep default */ }
+        })();
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
+
     <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Daniel Hanák",
+        "alternateName": "ContiHan",
+        "url": "https://contihan.github.io/",
+        "image": "https://contihan.github.io/assets/profile.webp",
+        "jobTitle": "QA & Performance Engineer",
+        "sameAs": [
+            "https://github.com/ContiHan",
+            "https://www.linkedin.com/in/daniel-han%C3%A1k-b3405864/"
+        ]
+    }
+    </script>
 </head>
 <body>
-    
+    <a class="skip-link" href="#main">Skip to content</a>
 
     <!-- Scroll Progress Bar -->
     <div id="scroll-progress"></div>
 
     <!-- Theme Toggle -->
-    <div class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </div>
+    </button>
 
     <!-- Audio Toggle -->
-    <div class="audio-toggle" id="audio-toggle" aria-label="Toggle audio">
-        <i class="fas fa-volume-mute"></i>
-    </div>
+    <button type="button" class="audio-toggle" id="audio-toggle" aria-label="Toggle audio" aria-pressed="false">
+        <i class="fas fa-volume-mute" aria-hidden="true"></i>
+    </button>
 
     <!-- Navigation -->
     <nav class="navbar">
@@ -52,29 +87,29 @@
                     <span class="user">contihan@qa</span><span class="colon">:</span><span class="tilde">~</span><span class="prompt">#</span>&nbsp;<span class="cursor">_</span>
                 </a>
             </div>
-            <ul class="nav-links">
+            <ul class="nav-links" id="nav-menu">
                 <li><a href="#about" class="nav-link" data-text="ABOUT_ME">01. ABOUT_ME</a></li>
                 <li><a href="#skills" class="nav-link" data-text="SKILLS">02. SKILLS</a></li>
                 <li><a href="#projects" class="nav-link" data-text="PROJECTS">03. PROJECTS</a></li>
                 <li><a href="#contact" class="nav-link" data-text="CONTACT">04. CONTACT</a></li>
             </ul>
-            <div class="hamburger">
+            <button type="button" class="hamburger" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-menu">
                 <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>
-            </div>
+            </button>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main>
+    <main id="main">
         <!-- Hero Section -->
         <section id="hero" class="hero">
             <div class="container hero-container">
                 <div class="hero-content">
                     <p class="greeting">System online. Welcome, I am</p>
                     <h1 class="glitch-title" data-text="Daniel Hanák">Daniel Hanák</h1>
-                    <h2 class="subtitle">aka <span class="highlight">ContiHan</span></h2>
+                    <p class="subtitle">aka <span class="highlight">ContiHan</span></p>
                     
                     <div class="typewriter-container">
                         <p class="typewriter-text" id="typewriter"></p>
@@ -86,19 +121,19 @@
                             <span class="cyber-button-glitch"></span>
                         </a>
                         <div class="social-links">
-                            <a href="https://github.com/ContiHan" target="_blank" aria-label="GitHub" class="social-icon">
-                                <i class="fab fa-github"></i>
+                            <a href="https://github.com/ContiHan" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="social-icon">
+                                <i class="fab fa-github" aria-hidden="true"></i>
                             </a>
-                            <a href="https://www.linkedin.com/in/daniel-han%C3%A1k-b3405864/" target="_blank" aria-label="LinkedIn" class="social-icon">
-                                <i class="fab fa-linkedin-in"></i>
+                            <a href="https://www.linkedin.com/in/daniel-han%C3%A1k-b3405864/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="social-icon">
+                                <i class="fab fa-linkedin-in" aria-hidden="true"></i>
                             </a>
                         </div>
                     </div>
                 </div>
                 <div class="hero-image-wrapper">
                     <div class="profile-glitch-container">
-                        <img src="assets/profile.webp" alt="Daniel Hanák" class="real-profile">
-                        <img src="assets/profile.png" alt="ContiHan Avatar" class="pixel-profile">
+                        <img src="assets/profile.webp" alt="Daniel Hanák" class="real-profile" width="750" height="750" fetchpriority="high">
+                        <img src="assets/profile.png" alt="" aria-hidden="true" class="pixel-profile" width="640" height="640">
                     </div>
                 </div>
             </div>
@@ -115,6 +150,7 @@
         <!-- Terminal Section -->
         <section id="terminal-section" class="terminal-section">
             <div class="container section-reveal">
+                <h2 class="sr-only">Interactive terminal</h2>
                 <div class="terminal-window">
                     <div class="terminal-header">
                         <div class="terminal-buttons">
@@ -124,12 +160,12 @@
                         </div>
                         <div class="terminal-title">contihan@mainframe: ~</div>
                     </div>
-                    <div class="terminal-body" id="terminal-body">
+                    <div class="terminal-body" id="terminal-body" role="log">
                         <div class="terminal-line">Login successful.</div>
                         <div class="terminal-line">Type <span class="highlight-cmd">'help'</span> for a list of commands.</div>
                         <div class="terminal-input-line">
                             <span class="prompt">contihan@mainframe:~$</span>
-                            <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
+                            <input type="text" id="terminal-input" aria-label="Terminal command input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
                         </div>
                     </div>
                 </div>
@@ -150,7 +186,7 @@
                         <div class="stat-card">
                             <i class="fas fa-shield-alt stat-icon"></i>
                             <h3>QA & Security</h3>
-                            <p>Ensuring quality and penetrating system security.</p>
+                            <p>Ensuring quality and probing systems for weaknesses.</p>
                         </div>
                         <div class="stat-card">
                             <i class="fas fa-chart-line stat-icon"></i>
@@ -174,35 +210,43 @@
                 <div class="skills-grid">
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fab fa-windows skill-cat-icon"></i>
+                            <i class="fas fa-vial skill-cat-icon" aria-hidden="true"></i>
+                            <h3>Test Automation</h3>
+                        </div>
+                        <p><strong>Cypress, Playwright, Selenium</strong> for functional testing; <strong>JMeter, K6, Gatling</strong> for performance.</p>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Test automation proficiency"><div class="progress" data-width="85%" style="width: 0%"></div></div>
+                    </div>
+                    <div class="skill-category">
+                        <div class="skill-header">
+                            <i class="fab fa-windows skill-cat-icon" aria-hidden="true"></i>
                             <h3>.NET / C#</h3>
                         </div>
                         <p>Used primarily within <strong>functional tests</strong>.</p>
-                        <div class="progress-bar"><div class="progress" data-width="65%" style="width: 0%"></div></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label=".NET and C# proficiency"><div class="progress" data-width="65%" style="width: 0%"></div></div>
                     </div>
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fab fa-python skill-cat-icon"></i>
+                            <i class="fab fa-python skill-cat-icon" aria-hidden="true"></i>
                             <h3>Python</h3>
                         </div>
                         <p>My main tool for <strong>Data Science</strong> and statistics.</p>
-                        <div class="progress-bar"><div class="progress" data-width="70%" style="width: 0%"></div></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" aria-label="Python proficiency"><div class="progress" data-width="70%" style="width: 0%"></div></div>
                     </div>
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fab fa-js skill-cat-icon"></i>
+                            <i class="fab fa-js skill-cat-icon" aria-hidden="true"></i>
                             <h3>JavaScript</h3>
                         </div>
                         <p>Utilized within <strong>k6 performance tests</strong>.</p>
-                        <div class="progress-bar"><div class="progress" data-width="60%" style="width: 0%"></div></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" aria-label="JavaScript proficiency"><div class="progress" data-width="60%" style="width: 0%"></div></div>
                     </div>
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fas fa-brain skill-cat-icon"></i>
+                            <i class="fas fa-brain skill-cat-icon" aria-hidden="true"></i>
                             <h3>AI & Models</h3>
                         </div>
                         <p>ARIMA, NBeats, Chronos, Deep Learning, Foundation models.</p>
-                        <div class="progress-bar"><div class="progress" data-width="35%" style="width: 0%"></div></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100" aria-label="AI and predictive models proficiency"><div class="progress" data-width="35%" style="width: 0%"></div></div>
                     </div>
                 </div>
             </div>
@@ -217,9 +261,9 @@
                     <!-- Project 1 -->
                     <div class="project-card">
                         <div class="project-image">
-                            <img src="assets/ai_models.png" alt="Master Thesis - Predictive Models">
+                            <img src="assets/ai_models.webp" alt="Master Thesis - Predictive Models" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://theses.cz/id/vc332g/" target="_blank" class="project-link"><i class="fas fa-graduation-cap"></i> View thesis</a>
+                                <a href="https://theses.cz/id/vc332g/" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fas fa-graduation-cap" aria-hidden="true"></i> View thesis</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -229,16 +273,16 @@
                                 <span class="tag">N-BEATS</span>
                             </div>
                             <h3>Master's Thesis: AI Models</h3>
-                            <p>Predictive modeling using deep learning and foundation models for time series forecasting. Explores statistical mechanics and advanced architectures applied to real-world datasets.</p>
+                            <p>Predictive modeling using deep learning and foundation models for time series forecasting. Explores statistical methods and advanced architectures applied to real-world datasets.</p>
                         </div>
                     </div>
 
                     <!-- Project 2 -->
                     <div class="project-card">
                         <div class="project-image">
-                            <img src="assets/lptyna_mockup.png" alt="Lptyna.cz Project">
+                            <img src="assets/lptyna_mockup.webp" alt="Lptyna.cz Project" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="http://www.lptyna.cz" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i> Visit website</a>
+                                <a href="https://www.lptyna.cz" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fas fa-external-link-alt" aria-hidden="true"></i> Visit website</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -248,16 +292,16 @@
                                 <span class="tag">Vanilla JS</span>
                             </div>
                             <h3>lptyna.cz</h3>
-                            <p>A website for my wife's services, built entirely <strong>without frameworks</strong>. The goal was to understand the low-level workings of the web, write clean code, and have absolute control over every element. A great experience for better understanding modern frameworks and vibecoding "under the hood".</p>
+                            <p>A website for my wife's services, built entirely <strong>without frameworks</strong>. The goal: understand how the web works at a low level, write clean code, and keep absolute control over every element.</p>
                         </div>
                     </div>
 
                     <!-- Project 3 -->
                     <div class="project-card">
                         <div class="project-image">
-                            <img src="assets/smart_lights.png" alt="Smart Lighting Project">
+                            <img src="assets/smart_lights.webp" alt="Smart Lighting Project" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://github.com/ContiHan/SmartHallwayLights" target="_blank" class="project-link"><i class="fab fa-github"></i> Source code</a>
+                                <a href="https://github.com/ContiHan/SmartHallwayLights" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fab fa-github" aria-hidden="true"></i> Source code</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -267,16 +311,16 @@
                                 <span class="tag">Hardware</span>
                             </div>
                             <h3>Smart Hallway Lights</h3>
-                            <p>Smart home lighting project. The roadmap includes serving files from LittleFS, migrating to ESPAsyncWebServer with WebSockets, OOP refactoring, non-blocking PWM without delay(), and MQTT integration with a Captive Portal.</p>
+                            <p>A smart lighting controller for my hallway, built on ESP hardware in C++. Actively evolving — LittleFS file serving, ESPAsyncWebServer with WebSockets, non-blocking PWM, and MQTT with a Captive Portal are on the roadmap.</p>
                         </div>
                     </div>
 
                     <!-- Project 4 -->
                     <div class="project-card">
                         <div class="project-image">
-                            <img src="assets/interactive_stats.png" alt="Interactive Statistics Dashboard">
+                            <img src="assets/interactive_stats.webp" alt="Interactive Statistics Dashboard" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://github.com/ContiHan/interactive-statistics" target="_blank" class="project-link"><i class="fab fa-github"></i> Source code</a>
+                                <a href="https://github.com/ContiHan/interactive-statistics" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fab fa-github" aria-hidden="true"></i> Source code</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -286,16 +330,16 @@
                                 <span class="tag">Statistics</span>
                             </div>
                             <h3>Interactive Statistics</h3>
-                            <p>A repository created out of a desire to provide a visual representation of basic and advanced statistical mechanics for the purpose of understanding course material at university. Features interactive visualizations and data modeling.</p>
+                            <p>A repository born from the desire to visualize basic and advanced statistical concepts while studying course material at university. Features interactive visualizations and data modeling.</p>
                         </div>
                     </div>
 
                     <!-- Project 5 -->
                     <div class="project-card">
                         <div class="project-image">
-                            <img src="assets/more_projects.png" alt="More Projects">
+                            <img src="assets/more_projects.webp" alt="More Projects" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://github.com/ContiHan?tab=repositories" target="_blank" class="project-link"><i class="fab fa-github"></i> View all</a>
+                                <a href="https://github.com/ContiHan?tab=repositories" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fab fa-github" aria-hidden="true"></i> View all</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -324,31 +368,29 @@
                 <div class="contact-content">
                     <p>Looking for a QA, Performance, or Security Engineer? I am always open to discussing new opportunities or interesting projects.</p>
                     <div class="contact-actions">
-                        <!-- Nahraď tvuj@email.cz tvým reálným emailem -->
                         <a href="mailto:daniel.hanak@outlook.cz" class="cyber-button">
-                            <i class="fas fa-envelope"></i> <span class="cyber-button-text">Send Transmission</span>
+                            <i class="fas fa-envelope" aria-hidden="true"></i> <span class="cyber-button-text">Send Transmission</span>
                             <span class="cyber-button-glitch"></span>
                         </a>
-                        <!-- Sem stačí nahrát PDF do složky assets pod jménem cv_daniel_hanak.pdf -->
-                        <a href="assets/cv_daniel_hanak.pdf" target="_blank" class="cyber-button secondary">
-                            <i class="fas fa-download"></i> <span class="cyber-button-text">Download CV</span>
+                        <a href="assets/cv_daniel_hanak.pdf" target="_blank" rel="noopener noreferrer" class="cyber-button secondary">
+                            <i class="fas fa-download" aria-hidden="true"></i> <span class="cyber-button-text">Download CV</span>
                             <span class="cyber-button-glitch"></span>
                         </a>
                     </div>
                 </div>
             </div>
         </section>
-        
-        <!-- Footer -->
-        <footer>
-            <div class="container">
-                <div class="footer-content">
-                    <p>&copy; <span id="year"></span> Ing. Daniel Hanák (ContiHan). All rights reserved.</p>
-                    <p class="tech-stack-footer">Built with <span class="highlight">Vanilla HTML/CSS/JS</span> for max performance.</p>
-                </div>
-            </div>
-        </footer>
     </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; <span id="year"></span> Ing. Daniel Hanák (ContiHan). All rights reserved.</p>
+                <p class="tech-stack-footer">Built with <span class="highlight">Vanilla HTML/CSS/JS</span> for max performance.</p>
+            </div>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>

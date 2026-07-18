@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 | Daniel Hanák (ContiHan)</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#050505">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+    <!-- Apply saved/preferred theme before first paint (prevents theme flash) -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) { /* storage unavailable (private mode) — keep default */ }
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .error-page {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .error-terminal {
+            max-width: 600px;
+            width: 100%;
+        }
+        .error-terminal .terminal-body {
+            height: auto;
+            min-height: 220px;
+        }
+        .error-code {
+            font-family: var(--font-heading);
+            font-size: 4rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px var(--accent-glow);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <main class="error-page">
+        <div class="terminal-window error-terminal">
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <span class="btn close"></span>
+                    <span class="btn minimize"></span>
+                    <span class="btn maximize"></span>
+                </div>
+                <div class="terminal-title">contihan@mainframe: ~</div>
+            </div>
+            <div class="terminal-body">
+                <p class="error-code">404</p>
+                <div class="terminal-line">contihan@mainframe:~$ locate requested_resource</div>
+                <div class="terminal-line">ERROR: resource not found in this sector.</div>
+                <div class="terminal-line">Suggested fix: return to <a href="/" class="highlight-cmd">the mainframe</a>.</div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
