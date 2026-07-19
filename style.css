@@ -373,6 +373,7 @@ ul {
 
 .real-profile, .pixel-profile {
     width: 100%;
+    height: auto; /* width/height HTML attributes only set aspect ratio, not fixed size */
     display: block;
     border-radius: 10px;
 }
