@@ -171,9 +171,16 @@ test.describe('404 page', () => {
         await expect(page.locator('.terminal-window')).toBeVisible();
         await expect(page.locator('.error-code')).toHaveText('404');
 
-        const expectedChrome = { win32: /os-windows/, linux: /os-linux/, darwin: /^((?!os-).)*$/ }[process.platform];
-        if (expectedChrome) {
-            await expect(page.locator('.terminal-window')).toHaveClass(expectedChrome);
+        // Expectation derives from the browser's UA (Playwright device descriptors
+        // pin their own UA regardless of host OS), mirroring os-chrome.js logic
+        const ua = await page.evaluate(() => navigator.userAgent);
+        const win = page.locator('.terminal-window');
+        if (/Windows/i.test(ua)) {
+            await expect(win).toHaveClass(/os-windows/);
+        } else if (/Linux|X11|Android|CrOS/i.test(ua) && !/Mac OS X/i.test(ua)) {
+            await expect(win).toHaveClass(/os-linux/);
+        } else {
+            await expect(win).not.toHaveClass(/os-(windows|linux)/);
         }
 
         await page.locator('.terminal-body a').click();
