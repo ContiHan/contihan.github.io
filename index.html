@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'">
     <title>Daniel Hanák | QA & Performance Engineer (ContiHan)</title>
 
     <!-- SEO Meta Tags -->
@@ -15,33 +16,20 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://contihan.github.io/">
     <meta property="og:locale" content="en_US">
-    <meta property="og:image" content="https://contihan.github.io/assets/profile.png">
-    <meta property="og:image:width" content="640">
-    <meta property="og:image:height" content="640">
-    <meta property="og:image:alt" content="Pixel-art avatar of Daniel Hanák">
-    <meta name="twitter:card" content="summary">
+    <meta property="og:image" content="https://contihan.github.io/assets/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Daniel Hanák — QA, Performance & Security Engineer">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 
     <!-- Apply saved/preferred theme before first paint (prevents theme flash) -->
-    <script>
-        (function () {
-            try {
-                var t = localStorage.getItem('theme');
-                if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', t);
-            } catch (e) { /* storage unavailable (private mode) — keep default */ }
-        })();
-    </script>
+    <script src="theme-init.js"></script>
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!-- FontAwesome for Icons -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- Self-hosted fonts (declared in style.css); icons are an inline SVG sprite (assets/icons.svg) -->
+    <link rel="preload" href="assets/fonts/chakra-petch-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="assets/fonts/fira-code-var.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
@@ -76,7 +64,7 @@
 
     <!-- Audio Toggle -->
     <button type="button" class="audio-toggle" id="audio-toggle" aria-label="Toggle audio" aria-pressed="false">
-        <i class="fas fa-volume-mute" aria-hidden="true"></i>
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-volume-xmark"/></svg>
     </button>
 
     <!-- Navigation -->
@@ -122,10 +110,10 @@
                         </a>
                         <div class="social-links">
                             <a href="https://github.com/ContiHan" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="social-icon">
-                                <i class="fab fa-github" aria-hidden="true"></i>
+                                <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-github"/></svg>
                             </a>
                             <a href="https://www.linkedin.com/in/daniel-han%C3%A1k-b3405864/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="social-icon">
-                                <i class="fab fa-linkedin-in" aria-hidden="true"></i>
+                                <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-linkedin-in"/></svg>
                             </a>
                         </div>
                     </div>
@@ -142,7 +130,7 @@
                     <div class="wheel"></div>
                 </div>
                 <div class="arrow-down">
-                    <i class="fas fa-chevron-down"></i>
+                    <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-down"/></svg>
                 </div>
             </div>
         </section>
@@ -184,17 +172,17 @@
                     </div>
                     <div class="about-stats">
                         <div class="stat-card">
-                            <i class="fas fa-shield-alt stat-icon"></i>
+                            <svg class="icon stat-icon" aria-hidden="true"><use href="assets/icons.svg#i-shield-halved"/></svg>
                             <h3>QA & Security</h3>
                             <p>Ensuring quality and probing systems for weaknesses.</p>
                         </div>
                         <div class="stat-card">
-                            <i class="fas fa-chart-line stat-icon"></i>
+                            <svg class="icon stat-icon" aria-hidden="true"><use href="assets/icons.svg#i-chart-line"/></svg>
                             <h3>Data Science</h3>
                             <p>Predictive models and data analysis.</p>
                         </div>
                         <div class="stat-card">
-                            <i class="fas fa-rocket stat-icon"></i>
+                            <svg class="icon stat-icon" aria-hidden="true"><use href="assets/icons.svg#i-rocket"/></svg>
                             <h3>Sci-Fi Fan</h3>
                             <p>Star Wars and fascination with future technologies.</p>
                         </div>
@@ -210,7 +198,7 @@
                 <div class="skills-grid">
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fas fa-vial skill-cat-icon" aria-hidden="true"></i>
+                            <svg class="icon skill-cat-icon" aria-hidden="true"><use href="assets/icons.svg#i-vial"/></svg>
                             <h3>Test Automation</h3>
                         </div>
                         <p><strong>C#</strong> on a proprietary NUnit-based framework — CRUD tests over API clients generated from the backend, plus <strong>microservice</strong> service tests.</p>
@@ -218,7 +206,7 @@
                     </div>
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fas fa-shield-halved skill-cat-icon" aria-hidden="true"></i>
+                            <svg class="icon skill-cat-icon" aria-hidden="true"><use href="assets/icons.svg#i-shield-halved"/></svg>
                             <h3>Security & Compliance</h3>
                         </div>
                         <p>Dependency & vulnerability scanning (<strong>.NET, yarn</strong>), SPOC for external pentests. CVE · CVSS · NIST · ASVS · NIS2, ISO 27001 foundations.</p>
@@ -226,7 +214,7 @@
                     </div>
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fas fa-gauge-high skill-cat-icon" aria-hidden="true"></i>
+                            <svg class="icon skill-cat-icon" aria-hidden="true"><use href="assets/icons.svg#i-gauge-high"/></svg>
                             <h3>Performance Testing</h3>
                         </div>
                         <p>Load & stress testing with <strong>k6</strong> — JavaScript scripting, thresholds, and result analysis.</p>
@@ -234,7 +222,7 @@
                     </div>
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fab fa-windows skill-cat-icon" aria-hidden="true"></i>
+                            <svg class="icon skill-cat-icon" aria-hidden="true"><use href="assets/icons.svg#i-windows"/></svg>
                             <h3>.NET / C#</h3>
                         </div>
                         <p>Primary language — <strong>functional & API tests</strong>, test framework extensions, microservice suites.</p>
@@ -242,7 +230,7 @@
                     </div>
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fab fa-python skill-cat-icon" aria-hidden="true"></i>
+                            <svg class="icon skill-cat-icon" aria-hidden="true"><use href="assets/icons.svg#i-python"/></svg>
                             <h3>Python · Data & AI</h3>
                         </div>
                         <p><strong>Statistics & Data Science</strong>; time-series forecasting with ARIMA, N-BEATS, Chronos, deep learning & foundation models.</p>
@@ -250,7 +238,7 @@
                     </div>
                     <div class="skill-category">
                         <div class="skill-header">
-                            <i class="fas fa-diagram-project skill-cat-icon" aria-hidden="true"></i>
+                            <svg class="icon skill-cat-icon" aria-hidden="true"><use href="assets/icons.svg#i-diagram-project"/></svg>
                             <h3>DevOps & IaC</h3>
                         </div>
                         <p>Build & release pipelines in <strong>Azure DevOps</strong>; infrastructure-as-code starter with <strong>Pulumi</strong>.</p>
@@ -271,7 +259,7 @@
                         <div class="project-image">
                             <img src="assets/ai_models.webp" alt="Master Thesis - Predictive Models" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://theses.cz/id/vc332g/" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fas fa-graduation-cap" aria-hidden="true"></i> View thesis</a>
+                                <a href="https://theses.cz/id/vc332g/" target="_blank" rel="noopener noreferrer" class="project-link"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-graduation-cap"/></svg> View thesis</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -290,7 +278,7 @@
                         <div class="project-image">
                             <img src="assets/lptyna_mockup.webp" alt="Lptyna.cz Project" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://github.com/ContiHan/WebPage-Tyna-LactationConsultant" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fab fa-github" aria-hidden="true"></i> Source code</a>
+                                <a href="https://github.com/ContiHan/WebPage-Tyna-LactationConsultant" target="_blank" rel="noopener noreferrer" class="project-link"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-github"/></svg> Source code</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -309,7 +297,7 @@
                         <div class="project-image">
                             <img src="assets/smart_lights.webp" alt="Smart Lighting Project" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://github.com/ContiHan/SmartHallwayLights" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fab fa-github" aria-hidden="true"></i> Source code</a>
+                                <a href="https://github.com/ContiHan/SmartHallwayLights" target="_blank" rel="noopener noreferrer" class="project-link"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-github"/></svg> Source code</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -328,7 +316,7 @@
                         <div class="project-image">
                             <img src="assets/interactive_stats.webp" alt="Interactive Statistics Dashboard" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://github.com/ContiHan/interactive-statistics" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fab fa-github" aria-hidden="true"></i> Source code</a>
+                                <a href="https://github.com/ContiHan/interactive-statistics" target="_blank" rel="noopener noreferrer" class="project-link"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-github"/></svg> Source code</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -347,7 +335,7 @@
                         <div class="project-image">
                             <img src="assets/more_projects.webp" alt="More Projects" width="1024" height="1024" loading="lazy">
                             <div class="project-overlay">
-                                <a href="https://github.com/ContiHan?tab=repositories" target="_blank" rel="noopener noreferrer" class="project-link"><i class="fab fa-github" aria-hidden="true"></i> View all</a>
+                                <a href="https://github.com/ContiHan?tab=repositories" target="_blank" rel="noopener noreferrer" class="project-link"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-github"/></svg> View all</a>
                             </div>
                         </div>
                         <div class="project-info">
@@ -377,11 +365,11 @@
                     <p>Looking for a QA, Performance, or Security Engineer? I am always open to discussing new opportunities or interesting projects.</p>
                     <div class="contact-actions">
                         <a href="mailto:daniel.hanak@outlook.cz" class="cyber-button">
-                            <i class="fas fa-envelope" aria-hidden="true"></i> <span class="cyber-button-text">Send Transmission</span>
+                            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-envelope"/></svg> <span class="cyber-button-text">Send Transmission</span>
                             <span class="cyber-button-glitch"></span>
                         </a>
                         <a href="assets/cv_daniel_hanak.pdf" target="_blank" rel="noopener noreferrer" class="cyber-button secondary">
-                            <i class="fas fa-download" aria-hidden="true"></i> <span class="cyber-button-text">Download CV</span>
+                            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-download"/></svg> <span class="cyber-button-text">Download CV</span>
                             <span class="cyber-button-glitch"></span>
                         </a>
                     </div>
@@ -400,6 +388,7 @@
         </div>
     </footer>
 
+    <script src="os-chrome.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

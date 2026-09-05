@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioToggleBtn = document.getElementById('audio-toggle');
 
     if (audioToggleBtn) {
-        const audioIcon = audioToggleBtn.querySelector('i');
+        const audioIconUse = audioToggleBtn.querySelector('use');
         audioToggleBtn.addEventListener('click', () => {
             if (!audioContext) {
                 audioContext = new AudioContextClass();
@@ -178,11 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
             isMuted = !isMuted;
             audioToggleBtn.setAttribute('aria-pressed', String(!isMuted));
             if (isMuted) {
-                audioIcon.classList.remove('fa-volume-up');
-                audioIcon.classList.add('fa-volume-mute');
+                audioIconUse.setAttribute('href', 'assets/icons.svg#i-volume-xmark');
             } else {
-                audioIcon.classList.remove('fa-volume-mute');
-                audioIcon.classList.add('fa-volume-up');
+                audioIconUse.setAttribute('href', 'assets/icons.svg#i-volume-high');
                 if (audioContext.state === 'suspended') {
                     audioContext.resume();
                 }
@@ -450,16 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalInput = document.getElementById('terminal-input');
     const terminalBody = document.getElementById('terminal-body');
 
-    // Window chrome matches the visitor's OS (macOS traffic lights are the default)
-    const terminalWindow = document.querySelector('.terminal-window');
-    if (terminalWindow) {
-        const ua = navigator.userAgent;
-        if (/Windows/i.test(ua)) {
-            terminalWindow.classList.add('os-windows');
-        } else if (/Linux|X11|Android|CrOS/i.test(ua) && !/Mac OS X/i.test(ua)) {
-            terminalWindow.classList.add('os-linux');
-        }
-    }
+    // (OS-specific window chrome is applied by os-chrome.js, shared with 404.html)
 
     if (terminalInput) {
         // Typing sounds
@@ -621,12 +610,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const stats = document.createElement('div');
             stats.className = 'github-stats';
 
-            const addStat = (iconClass, text) => {
+            const addStat = (iconName, text) => {
                 const span = document.createElement('span');
-                const icon = document.createElement('i');
-                icon.className = iconClass;
-                icon.setAttribute('aria-hidden', 'true');
-                span.appendChild(icon);
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'icon');
+                svg.setAttribute('aria-hidden', 'true');
+                const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+                use.setAttribute('href', 'assets/icons.svg#i-' + iconName);
+                svg.appendChild(use);
+                span.appendChild(svg);
                 span.appendChild(document.createTextNode(' ' + text));
                 stats.appendChild(span);
             };
@@ -635,11 +627,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const sizeInKb = repo.size;
             const sizeText = sizeInKb > 1024 ? (sizeInKb / 1024).toFixed(1) + ' MB' : sizeInKb + ' KB';
 
-            addStat('fas fa-clock', updatedDate);
-            addStat('fas fa-hdd', sizeText);
-            if (repo.language) addStat('fas fa-code', repo.language);
-            if (repo.stargazers_count > 0) addStat('fas fa-star', repo.stargazers_count);
-            if (repo.forks_count > 0) addStat('fas fa-code-branch', repo.forks_count);
+            addStat('clock', updatedDate);
+            addStat('hard-drive', sizeText);
+            if (repo.language) addStat('code', repo.language);
+            if (repo.stargazers_count > 0) addStat('star', repo.stargazers_count);
+            if (repo.forks_count > 0) addStat('code-branch', repo.forks_count);
 
             card.appendChild(heading);
             card.appendChild(desc);

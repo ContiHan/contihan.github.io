@@ -1,4 +1,39 @@
 /* =========================================
+   Self-hosted Fonts (latin subset, woff2)
+========================================= */
+@font-face {
+    font-family: 'Fira Code';
+    font-style: normal;
+    font-weight: 400 700; /* variable font — one file covers all used weights */
+    font-display: swap;
+    src: url('assets/fonts/fira-code-var.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Chakra Petch';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/chakra-petch-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Chakra Petch';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('assets/fonts/chakra-petch-500.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Chakra Petch';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('assets/fonts/chakra-petch-700.woff2') format('woff2');
+}
+
+/* =========================================
    CSS Variables & Theme Setup
 ========================================= */
 :root {
@@ -84,6 +119,16 @@ ul {
 :focus-visible {
     outline: 2px solid var(--accent-color);
     outline-offset: 3px;
+}
+
+/* Inline SVG icons (sprite: assets/icons.svg) — sized and colored like text */
+.icon {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    fill: currentColor;
+    vertical-align: -0.125em;
+    flex-shrink: 0; /* unlike font glyphs, SVGs would collapse to 0 in tight flex rows */
 }
 
 /* Screen-reader-only content */
@@ -1024,7 +1069,7 @@ footer {
     white-space: nowrap;
 }
 
-.github-stats i {
+.github-stats .icon {
     color: var(--accent-color);
     margin-right: 5px;
 }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
     <title>404 | Daniel Hanák (ContiHan)</title>
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#050505">
@@ -10,19 +11,8 @@
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 
     <!-- Apply saved/preferred theme before first paint (prevents theme flash) -->
-    <script>
-        (function () {
-            try {
-                var t = localStorage.getItem('theme');
-                if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', t);
-            } catch (e) { /* storage unavailable (private mode) — keep default */ }
-        })();
-    </script>
+    <script src="theme-init.js"></script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         .error-page {
@@ -69,16 +59,6 @@
             </div>
         </div>
     </main>
-    <script>
-        (function () {
-            var w = document.querySelector('.terminal-window');
-            var ua = navigator.userAgent;
-            if (/Windows/i.test(ua)) {
-                w.classList.add('os-windows');
-            } else if (/Linux|X11|Android|CrOS/i.test(ua) && !/Mac OS X/i.test(ua)) {
-                w.classList.add('os-linux');
-            }
-        })();
-    </script>
+    <script src="os-chrome.js"></script>
 </body>
 </html>
