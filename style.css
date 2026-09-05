@@ -51,6 +51,23 @@
     --border-color: #333;
     --transition-speed: 0.3s;
 
+    /* Terminal palette (matching light values live in [data-theme="light"]) */
+    --terminal-bg: #0a0a0a;
+    --terminal-border: var(--accent-color);
+    --terminal-shadow: 0 10px 30px rgba(0, 255, 204, 0.1), inset 0 0 10px rgba(0, 255, 204, 0.05);
+    --terminal-header-bg: #151515;
+    --terminal-header-border: #333;
+    --terminal-title: #999; /* 6.4:1 on the header (WCAG AA) */
+    --terminal-fg: #0fc;
+    --terminal-input-glow: 0 0 5px #0fc;
+    --terminal-prompt: #888;
+    --terminal-cmd: #f0f;
+    --terminal-btn-fg: #999;
+    --terminal-btn-hover-bg: rgba(255, 255, 255, 0.08);
+    --terminal-btn-linux-bg: #3a3a3a;
+    --terminal-btn-linux-fg: #cfcfcf;
+    --terminal-btn-linux-hover: #4d4d4d;
+
     /* Typography */
     --font-main: 'Fira Code', monospace;
     --font-heading: 'Chakra Petch', sans-serif;
@@ -65,6 +82,23 @@
     --accent-color: #007a80; /* Dark teal — 4.7:1 contrast on light bg (WCAG AA) */
     --accent-glow: rgba(0, 122, 128, 0.3);
     --border-color: #d4d4d8;
+
+    /* Terminal palette */
+    --terminal-bg: #f5f5f5;
+    --terminal-border: #ccc;
+    --terminal-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --terminal-header-bg: #e0e0e0;
+    --terminal-header-border: #ccc;
+    --terminal-title: #555;
+    --terminal-fg: #333;
+    --terminal-input-glow: none;
+    --terminal-prompt: #06c;
+    --terminal-cmd: #c06;
+    --terminal-btn-fg: #555;
+    --terminal-btn-hover-bg: rgba(0, 0, 0, 0.08);
+    --terminal-btn-linux-bg: #dadada;
+    --terminal-btn-linux-fg: #444;
+    --terminal-btn-linux-hover: #c6c6c6;
 }
 
 /* =========================================
@@ -218,6 +252,12 @@ ul {
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
+}
+
+/* Sun/moon are stroke icons from the sprite — match the old inline SVG size */
+.theme-toggle .icon {
+    width: 24px;
+    height: 24px;
 }
 
 @media (hover: hover) {
@@ -1297,12 +1337,12 @@ body.theme-flash {
 }
 
 .terminal-window {
-    background-color: #0a0a0a;
-    border: 1px solid var(--accent-color);
+    background-color: var(--terminal-bg);
+    border: 1px solid var(--terminal-border);
     border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 255, 204, 0.1), inset 0 0 10px rgba(0,255,204,0.05);
+    box-shadow: var(--terminal-shadow);
     overflow: hidden;
-    font-family: 'Fira Code', monospace;
+    font-family: var(--font-main);
     max-width: 800px;
     margin: 0 auto;
     transition: box-shadow 0.3s ease;
@@ -1314,11 +1354,11 @@ body.theme-flash {
 }
 
 .terminal-header {
-    background-color: #151515;
+    background-color: var(--terminal-header-bg);
     padding: 10px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--terminal-header-border);
 }
 
 .terminal-buttons {
@@ -1337,7 +1377,7 @@ body.theme-flash {
 .btn.maximize { background-color: #27c93f; }
 
 .terminal-title {
-    color: #999; /* 6.4:1 on #151515 (WCAG AA) */
+    color: var(--terminal-title);
     font-size: 0.9rem;
     flex-grow: 1;
     text-align: center;
@@ -1398,12 +1438,12 @@ body.theme-flash {
     width: 34px;
     height: 24px;
     border-radius: 4px;
-    color: #999;
+    color: var(--terminal-btn-fg);
     font-size: 12px;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.terminal-window.os-windows .btn:hover { background: rgba(255, 255, 255, 0.08); }
+.terminal-window.os-windows .btn:hover { background: var(--terminal-btn-hover-bg); }
 .terminal-window.os-windows .btn.close:hover { background: #e81123; color: #fff; }
 
 /* Linux (GNOME/Adwaita) flavor: round grey buttons */
@@ -1413,17 +1453,17 @@ body.theme-flash {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #3a3a3a;
-    color: #cfcfcf;
+    background: var(--terminal-btn-linux-bg);
+    color: var(--terminal-btn-linux-fg);
     font-size: 10px;
     transition: background-color 0.15s ease;
 }
 
-.terminal-window.os-linux .btn:hover { background: #4d4d4d; }
+.terminal-window.os-linux .btn:hover { background: var(--terminal-btn-linux-hover); }
 
 .terminal-body {
     padding: 20px;
-    color: #0fc;
+    color: var(--terminal-fg);
     height: 300px;
     overflow: hidden auto;
     font-size: 1rem;
@@ -1443,7 +1483,7 @@ body.theme-flash {
 }
 
 .highlight-cmd {
-    color: #f0f;
+    color: var(--terminal-cmd);
     font-weight: bold;
 }
 
@@ -1456,7 +1496,7 @@ body.theme-flash {
 
 .terminal-input-line .prompt {
     margin-right: 10px;
-    color: #888;
+    color: var(--terminal-prompt);
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -1464,70 +1504,13 @@ body.theme-flash {
 .terminal-input-line input {
     background: transparent;
     border: none;
-    color: #0fc;
-    font-family: 'Fira Code', monospace;
+    color: var(--terminal-fg);
+    font-family: var(--font-main);
     font-size: 1rem;
     flex-grow: 1;
     min-width: 0;
     outline: none;
-    text-shadow: 0 0 5px #0fc;
-}
-
-/* Terminal Light Theme Overrides */
-html[data-theme="light"] .terminal-window {
-    background-color: #f5f5f5;
-    border: 1px solid #ccc;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-html[data-theme="light"] .terminal-header {
-    background-color: #e0e0e0;
-    border-bottom: 1px solid #ccc;
-}
-
-html[data-theme="light"] .terminal-title {
-    color: #555;
-}
-
-html[data-theme="light"] .terminal-body {
-    color: #333;
-}
-
-html[data-theme="light"] .terminal-input-line input {
-    color: #333;
-    text-shadow: none;
-}
-
-html[data-theme="light"] .terminal-input-line .prompt {
-    color: #06c;
-    font-weight: bold;
-}
-
-html[data-theme="light"] .highlight-cmd {
-    color: #c06;
-}
-
-html[data-theme="light"] .terminal-window.os-windows .btn {
-    color: #555;
-}
-
-html[data-theme="light"] .terminal-window.os-windows .btn:hover {
-    background: rgba(0, 0, 0, 0.08);
-    color: #333;
-}
-
-html[data-theme="light"] .terminal-window.os-windows .btn.close:hover {
-    background: #e81123;
-    color: #fff;
-}
-
-html[data-theme="light"] .terminal-window.os-linux .btn {
-    background: #dadada;
-    color: #444;
-}
-
-html[data-theme="light"] .terminal-window.os-linux .btn:hover {
-    background: #c6c6c6;
+    text-shadow: var(--terminal-input-glow);
 }
 
 /* Konami Violent Glitch */

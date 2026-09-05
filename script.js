@@ -12,6 +12,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // ===========================================
+    // Scroll lock (shared by mobile menu, Matrix and Konami)
+    // iOS Safari ignores overflow:hidden on <body>, so the lock uses the
+    // position:fixed technique and restores the scroll position on unlock.
+    // A counter handles overlapping locks (e.g. Konami while the menu is open).
+    // ===========================================
+    let scrollLockCount = 0;
+    let scrollLockY = 0;
+
+    function lockScroll() {
+        scrollLockCount++;
+        if (scrollLockCount > 1) return;
+        scrollLockY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollLockY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function unlockScroll() {
+        if (scrollLockCount === 0) return;
+        scrollLockCount--;
+        if (scrollLockCount > 0) return;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo({ top: scrollLockY, left: 0, behavior: 'instant' });
+    }
+
+    // ===========================================
     // 1. Typewriter Effect
     // ===========================================
     const typewriterElement = document.getElementById('typewriter');
@@ -87,16 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     const themeToggleBtn = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
+    const themeIconUse = themeToggleBtn.querySelector('use');
 
-    const sunSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
-    const moonSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
-
+    // Sun/moon live in the shared sprite — swap the <use> reference
     function updateIcon(theme) {
-        if (theme === 'light') {
-            themeToggleBtn.innerHTML = moonSVG;
-        } else {
-            themeToggleBtn.innerHTML = sunSVG;
-        }
+        themeIconUse.setAttribute('href', theme === 'light' ? 'assets/icons.svg#i-moon' : 'assets/icons.svg#i-sun');
     }
 
     // Theme attribute is already set pre-paint by the inline script in <head>;
@@ -235,16 +262,20 @@ document.addEventListener('DOMContentLoaded', () => {
             navLinks.classList.toggle('active');
             const isOpen = navLinks.classList.contains('active');
             hamburger.setAttribute('aria-expanded', String(isOpen));
-            // Restore to '' (not 'auto') so the stylesheet's overflow-x: hidden survives
-            document.body.style.overflow = isOpen ? 'hidden' : '';
+            if (isOpen) {
+                lockScroll();
+            } else {
+                unlockScroll();
+            }
         });
 
         navItems.forEach(item => {
             item.addEventListener('click', () => {
+                const wasOpen = navLinks.classList.contains('active');
                 hamburger.classList.remove('active');
                 navLinks.classList.remove('active');
                 hamburger.setAttribute('aria-expanded', 'false');
-                document.body.style.overflow = '';
+                if (wasOpen) unlockScroll();
             });
         });
     }
@@ -258,6 +289,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const pixelProfile = document.querySelector('.pixel-profile');
 
     if (glitchContainer && realProfile && pixelProfile) {
+        // Timing (ms)
+        const AVATAR_CYCLE_MS = 12000;  // how often the auto-glitch fires
+        const AVATAR_GLITCH_MS = 3000;  // how long the pixel face stays up
+        const AVATAR_RESUME_MS = 5000;  // idle time after a tap before the cycle resumes
+
         let isPixel = false;
         let autoGlitchInterval;
         let autoRevertTimeout;
@@ -286,9 +322,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     setPixelState(true);
                     autoRevertTimeout = setTimeout(() => {
                         if (isPixel) setPixelState(false);
-                    }, 3000);
+                    }, AVATAR_GLITCH_MS);
                 }
-            }, 12000);
+            }, AVATAR_CYCLE_MS);
         };
 
         const suspendAutoCycle = () => {
@@ -298,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
             interactionTimeout = setTimeout(() => {
                 setPixelState(false);
                 startAutoCycle();
-            }, 5000);
+            }, AVATAR_RESUME_MS);
         };
 
         glitchContainer.addEventListener('pointerenter', (e) => {
@@ -783,14 +819,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     // 14. Matrix Easter Egg (unified)
     // ===========================================
+    // Timing (ms)
+    const MATRIX_INTRO_MS = 1000;  // green fade-in before the rain starts
+    const MATRIX_RAIN_MS = 5000;   // how long new drops keep spawning
+    const MATRIX_FRAME_MS = 33;    // ~30 fps
+    const MATRIX_FADE_MS = 1000;   // canvas fade-out before cleanup
+
     function activateMatrix() {
         // Prevent double-trigger
         if (document.getElementById('matrix-overlay')) return;
 
         playBeep(300, 'square', 1.0);
-        document.body.style.overflow = 'hidden';
+        lockScroll();
 
-        // Phase 1: Smooth transition to green (1s)
+        // Phase 1: Smooth transition to green
         document.body.classList.add('matrix-mode-active');
 
         // Create overlay with canvas (hidden at first)
@@ -833,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let rafId;
 
             const drawFrame = (timestamp) => {
-                if (timestamp - lastFrame < 33) { // ~30 fps
+                if (timestamp - lastFrame < MATRIX_FRAME_MS) {
                     rafId = requestAnimationFrame(drawFrame);
                     return;
                 }
@@ -876,8 +918,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         overlay.remove();
                         document.body.classList.remove('matrix-mode-active');
-                        document.body.style.overflow = '';
-                    }, 1000);
+                        unlockScroll();
+                    }, MATRIX_FADE_MS);
                     return;
                 }
 
@@ -886,30 +928,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             rafId = requestAnimationFrame(drawFrame);
 
-            // Stop generating new drops after 5 seconds
+            // Stop generating new drops after the rain window
             setTimeout(() => {
                 stopping = true;
-            }, 5000);
-        }, 1000);
+            }, MATRIX_RAIN_MS);
+        }, MATRIX_INTRO_MS);
     }
 
 
     // ===========================================
     // 15. Konami Code Glitch Effect
     // ===========================================
+    // Timing (ms) and layout of the pixelation effect
+    const KONAMI_BLOCKS = 5;          // horizontal stripes covering the viewport
+    const KONAMI_BLOCK_IN_MS = 200;   // cascade-in step per block (also paces the crash sounds)
+    const KONAMI_BLOCK_OUT_MS = 150;  // cascade-out step per block
+    const KONAMI_HOLD_MS = 1000;      // full-glitch hold before the blocks retreat
+
     function triggerKonami() {
         // Prevent double-trigger (mirrors activateMatrix)
         if (document.getElementById('konami-overlay')) return;
 
-        document.body.style.overflow = 'hidden';
+        lockScroll();
 
         // 8-bit crash sounds
         let pitch = 150;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < KONAMI_BLOCKS; i++) {
             setTimeout(() => {
                 playBeep(pitch, 'sawtooth', 0.2);
                 pitch -= 20;
-            }, i * 200);
+            }, i * KONAMI_BLOCK_IN_MS);
         }
 
         const crashOverlay = document.createElement('div');
@@ -917,12 +965,11 @@ document.addEventListener('DOMContentLoaded', () => {
         crashOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999999;pointer-events:none;';
         document.body.appendChild(crashOverlay);
 
-        const blocks = 5;
-        const blockHeight = 100 / blocks;
+        const blockHeight = 100 / KONAMI_BLOCKS;
         const blockEls = [];
 
         // Pixelate down — blocks slide in from top
-        for (let i = 0; i < blocks; i++) {
+        for (let i = 0; i < KONAMI_BLOCKS; i++) {
             setTimeout(() => {
                 const block = document.createElement('div');
                 block.style.position = 'absolute';
@@ -935,13 +982,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 crashOverlay.appendChild(block);
                 blockEls.push(block);
                 playBeep(100 + i * 40, 'square', 0.08);
-            }, i * 200);
+            }, i * KONAMI_BLOCK_IN_MS);
         }
 
         // Pixelate up — blocks removed from bottom
         setTimeout(() => {
             let pitchUp = 50;
-            for (let i = 0; i < blocks; i++) {
+            for (let i = 0; i < KONAMI_BLOCKS; i++) {
                 setTimeout(() => {
                     playBeep(pitchUp, 'square', 0.1);
                     pitchUp += 30;
@@ -949,16 +996,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         const b = blockEls.pop();
                         b.remove();
                     }
-                }, i * 150);
+                }, i * KONAMI_BLOCK_OUT_MS);
             }
 
             // Cleanup
             setTimeout(() => {
                 crashOverlay.remove();
-                document.body.style.overflow = '';
-            }, blocks * 150 + 100);
+                unlockScroll();
+            }, KONAMI_BLOCKS * KONAMI_BLOCK_OUT_MS + 100);
 
-        }, blocks * 200 + 1000);
+        }, KONAMI_BLOCKS * KONAMI_BLOCK_IN_MS + KONAMI_HOLD_MS);
     }
 
 });
