@@ -39,16 +39,16 @@
 :root {
     /* Dark Theme (Default) */
     --bg-color: #050505;
-    --surface-color: #111111;
+    --surface-color: #111;
     --text-primary: #e0e0e0;
-    --text-secondary: #888888;
+    --text-secondary: #888;
 
     /* Cyberpunk / Tech Accents */
     --accent-color: #00f3ff;
     --accent-glow: rgba(0, 243, 255, 0.4);
 
     /* Utility */
-    --border-color: #333333;
+    --border-color: #333;
     --transition-speed: 0.3s;
 
     /* Typography */
@@ -59,13 +59,11 @@
 [data-theme="light"] {
     /* Light Tech Theme */
     --bg-color: #f4f4f5;
-    --surface-color: #ffffff;
+    --surface-color: #fff;
     --text-primary: #18181b;
     --text-secondary: #52525b;
-
     --accent-color: #007a80; /* Dark teal — 4.7:1 contrast on light bg (WCAG AA) */
     --accent-glow: rgba(0, 122, 128, 0.3);
-
     --border-color: #d4d4d8;
 }
 
@@ -95,13 +93,16 @@ body {
 ::-webkit-scrollbar {
     width: 10px;
 }
+
 ::-webkit-scrollbar-track {
     background: var(--bg-color);
 }
+
 ::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: 5px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
 }
@@ -126,7 +127,7 @@ ul {
     width: 1em;
     height: 1em;
     display: inline-block;
-    fill: currentColor;
+    fill: currentcolor;
     vertical-align: -0.125em;
     flex-shrink: 0; /* unlike font glyphs, SVGs would collapse to 0 in tight flex rows */
 }
@@ -443,7 +444,7 @@ ul {
 @keyframes glitch-anim-in {
     0% { opacity: 0; clip-path: inset(10% 0 80% 0); transform: translate(-3px, 2px); filter: hue-rotate(90deg); }
     20% { opacity: 1; clip-path: inset(80% 0 5% 0); transform: translate(3px, -2px); filter: hue-rotate(-90deg); }
-    40% { opacity: 1; clip-path: inset(40% 0 40% 0); transform: translate(-3px, 0px); filter: hue-rotate(180deg); }
+    40% { opacity: 1; clip-path: inset(40% 0 40% 0); transform: translate(-3px, 0); filter: hue-rotate(180deg); }
     60% { opacity: 1; clip-path: inset(0 0 90% 0); transform: translate(3px, 2px); filter: hue-rotate(0deg); }
     80% { opacity: 1; clip-path: inset(50% 0 30% 0); transform: translate(-3px, -2px); filter: hue-rotate(90deg); }
     100% { opacity: 1; clip-path: inset(0 0 0 0); transform: translate(0); filter: hue-rotate(0deg); }
@@ -453,7 +454,7 @@ ul {
     0% { opacity: 1; clip-path: inset(0 0 0 0); transform: translate(0); filter: hue-rotate(0deg); }
     20% { opacity: 1; clip-path: inset(10% 0 80% 0); transform: translate(3px, -2px); filter: hue-rotate(90deg); }
     40% { opacity: 1; clip-path: inset(80% 0 5% 0); transform: translate(-3px, 2px); filter: hue-rotate(-90deg); }
-    60% { opacity: 1; clip-path: inset(40% 0 40% 0); transform: translate(3px, 0px); filter: hue-rotate(180deg); }
+    60% { opacity: 1; clip-path: inset(40% 0 40% 0); transform: translate(3px, 0); filter: hue-rotate(180deg); }
     80% { opacity: 1; clip-path: inset(0 0 90% 0); transform: translate(-3px, -2px); filter: hue-rotate(0deg); }
     100% { opacity: 0; clip-path: inset(100% 0 0 0); transform: translate(0); filter: hue-rotate(0deg); }
 }
@@ -845,6 +846,7 @@ section {
 ========================================= */
 .projects-grid {
     display: grid;
+
     /* min() keeps cards from overflowing viewports narrower than the 350px floor */
     grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
     gap: 3rem;
@@ -855,7 +857,10 @@ section {
     border: 1px solid var(--border-color);
     border-radius: 5px;
     overflow: hidden;
-    /* transition defined once in the 3D-tilt block below */
+
+    /* transform is fast (0.1s) for the pointer-following 3D tilt */
+    transition: transform 0.1s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    transform-style: preserve-3d;
 }
 
 .project-card:hover {
@@ -1099,7 +1104,7 @@ footer {
 /* =========================================
    Responsive
 ========================================= */
-@media (max-width: 992px) {
+@media (width <= 992px) {
     .hero {
         height: auto;
         min-height: 100vh; /* Fallback for older browsers */
@@ -1142,7 +1147,7 @@ footer {
     }
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
     .glitch-title {
         font-size: 3.5rem;
     }
@@ -1210,7 +1215,7 @@ footer {
     }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
     .glitch-title {
         font-size: 2.5rem;
     }
@@ -1267,6 +1272,7 @@ body.theme-flash {
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
 }
+
 @media (hover: hover) {
 .audio-toggle:hover {
     transform: scale(1.1) rotate(15deg);
@@ -1274,8 +1280,9 @@ body.theme-flash {
     color: var(--bg-color);
 }
 }
+
 /* Sized alongside .theme-toggle in the 900px media query */
-@media (max-width: 900px) {
+@media (width <= 900px) {
     .audio-toggle {
         bottom: 78px;
         right: 20px;
@@ -1288,6 +1295,7 @@ body.theme-flash {
 .terminal-section {
     padding: 2rem 0;
 }
+
 .terminal-window {
     background-color: #0a0a0a;
     border: 1px solid var(--accent-color);
@@ -1304,6 +1312,7 @@ body.theme-flash {
 .terminal-window:focus-within {
     box-shadow: 0 0 25px var(--accent-glow), inset 0 0 10px rgba(0,255,204,0.05);
 }
+
 .terminal-header {
     background-color: #151515;
     padding: 10px;
@@ -1311,11 +1320,13 @@ body.theme-flash {
     align-items: center;
     border-bottom: 1px solid #333;
 }
+
 .terminal-buttons {
     display: flex;
     gap: 8px;
     margin-right: 15px;
 }
+
 .terminal-buttons .btn {
     width: 12px;
     height: 12px;
@@ -1364,15 +1375,19 @@ body.theme-flash {
 /* Buttons run minimize → maximize → close on non-mac systems */
 .terminal-window.os-windows .btn.minimize,
 .terminal-window.os-linux .btn.minimize { order: 1; }
+
 .terminal-window.os-windows .btn.maximize,
 .terminal-window.os-linux .btn.maximize { order: 2; }
+
 .terminal-window.os-windows .btn.close,
 .terminal-window.os-linux .btn.close { order: 3; }
 
 .terminal-window.os-windows .btn.minimize::before,
 .terminal-window.os-linux .btn.minimize::before { content: '–'; }
+
 .terminal-window.os-windows .btn.maximize::before,
 .terminal-window.os-linux .btn.maximize::before { content: '□'; }
+
 .terminal-window.os-windows .btn.close::before,
 .terminal-window.os-linux .btn.close::before { content: '×'; }
 
@@ -1408,25 +1423,27 @@ body.theme-flash {
 
 .terminal-body {
     padding: 20px;
-    color: #00ffcc;
+    color: #0fc;
     height: 300px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
     font-size: 1rem;
     line-height: 1.5;
 }
-@media (max-width: 768px) {
+
+@media (width <= 768px) {
     .terminal-body {
         height: 200px;
     }
 }
+
 .terminal-line {
     margin-bottom: 10px;
     word-break: break-word;
     overflow-wrap: break-word;
 }
+
 .highlight-cmd {
-    color: #ff00ff;
+    color: #f0f;
     font-weight: bold;
 }
 
@@ -1436,28 +1453,24 @@ body.theme-flash {
     margin-top: 10px;
     min-width: 0;
 }
+
 .terminal-input-line .prompt {
     margin-right: 10px;
     color: #888;
     white-space: nowrap;
     flex-shrink: 0;
 }
+
 .terminal-input-line input {
     background: transparent;
     border: none;
-    color: #00ffcc;
+    color: #0fc;
     font-family: 'Fira Code', monospace;
     font-size: 1rem;
     flex-grow: 1;
     min-width: 0;
     outline: none;
-    text-shadow: 0 0 5px #00ffcc;
-}
-
-/* 3D Tilt for Project Cards */
-.project-card {
-    transition: transform 0.1s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    transform-style: preserve-3d;
+    text-shadow: 0 0 5px #0fc;
 }
 
 /* Terminal Light Theme Overrides */
@@ -1466,43 +1479,53 @@ html[data-theme="light"] .terminal-window {
     border: 1px solid #ccc;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
+
 html[data-theme="light"] .terminal-header {
     background-color: #e0e0e0;
     border-bottom: 1px solid #ccc;
 }
+
 html[data-theme="light"] .terminal-title {
     color: #555;
 }
+
 html[data-theme="light"] .terminal-body {
     color: #333;
 }
+
 html[data-theme="light"] .terminal-input-line input {
     color: #333;
     text-shadow: none;
 }
+
 html[data-theme="light"] .terminal-input-line .prompt {
-    color: #0066cc;
+    color: #06c;
     font-weight: bold;
 }
+
 html[data-theme="light"] .highlight-cmd {
-    color: #cc0066;
+    color: #c06;
 }
 
 html[data-theme="light"] .terminal-window.os-windows .btn {
     color: #555;
 }
+
 html[data-theme="light"] .terminal-window.os-windows .btn:hover {
     background: rgba(0, 0, 0, 0.08);
     color: #333;
 }
+
 html[data-theme="light"] .terminal-window.os-windows .btn.close:hover {
     background: #e81123;
     color: #fff;
 }
+
 html[data-theme="light"] .terminal-window.os-linux .btn {
     background: #dadada;
     color: #444;
 }
+
 html[data-theme="light"] .terminal-window.os-linux .btn:hover {
     background: #c6c6c6;
 }
@@ -1511,16 +1534,17 @@ html[data-theme="light"] .terminal-window.os-linux .btn:hover {
 @keyframes konami-glitch {
     0% { filter: invert(1) hue-rotate(90deg) contrast(2); transform: translate(5px, 5px) skew(5deg); }
     10% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-5px, -5px) skew(-5deg); }
-    20% { filter: invert(1) hue-rotate(180deg) contrast(3); transform: translate(10px, 0px) skew(10deg) scale(1.05); }
+    20% { filter: invert(1) hue-rotate(180deg) contrast(3); transform: translate(10px, 0) skew(10deg) scale(1.05); }
     30% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-10px, 10px) skew(-10deg); }
     40% { filter: hue-rotate(270deg) contrast(2); transform: translate(5px, -10px) skew(5deg) scale(0.95); }
     50% { filter: invert(1) hue-rotate(90deg) contrast(2); transform: translate(-5px, 5px) skew(-5deg); }
     60% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(10px, -5px) skew(10deg); }
-    70% { filter: hue-rotate(180deg) contrast(3); transform: translate(-10px, 0px) skew(-10deg) scale(1.05); }
+    70% { filter: hue-rotate(180deg) contrast(3); transform: translate(-10px, 0) skew(-10deg) scale(1.05); }
     80% { filter: invert(1) hue-rotate(270deg) contrast(2); transform: translate(5px, 10px) skew(5deg); }
     90% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-5px, -10px) skew(-5deg) scale(0.95); }
     100% { filter: none; transform: none; }
 }
+
 .konami-active {
     animation: konami-glitch 0.3s infinite;
 }
@@ -1533,6 +1557,7 @@ html[data-theme="light"] .terminal-window.os-linux .btn:hover {
     /* Dark theme (default): accent cyan with near-black understroke */
     body, html { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%2300f3ff'%20stroke-width%3D'4'%20stroke-opacity%3D'0.35'%20d%3D'M4%204l6%2016%203-7%207-3z'%2F%3E%3Cpath%20fill%3D'%2300f3ff'%20stroke%3D'%23001018'%20stroke-width%3D'1.2'%20d%3D'M4%204l6%2016%203-7%207-3z'%2F%3E%3C%2Fsvg%3E") 4 4, default !important; }
     a, button, .project-link, input[type="button"], input[type="submit"] { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cg%20fill%3D'none'%20stroke%3D'%23001018'%20stroke-width%3D'4'%20stroke-opacity%3D'0.6'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'7'%2F%3E%3Cpath%20d%3D'M12%202v3M12%2019v3M2%2012h3M19%2012h3'%2F%3E%3C%2Fg%3E%3Cg%20fill%3D'none'%20stroke%3D'%2300f3ff'%20stroke-width%3D'1.8'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'7'%2F%3E%3Cpath%20d%3D'M12%202v3M12%2019v3M2%2012h3M19%2012h3'%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'2.2'%20fill%3D'%2300f3ff'%2F%3E%3C%2Fsvg%3E") 12 12, pointer !important; }
+
     /* I-beam only over the terminal text area — the header (window buttons) keeps
        the default arrow, and links inside the terminal get the pointer below */
     .terminal-body, .terminal-body * { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%23001018'%20stroke-width%3D'4'%20stroke-opacity%3D'0.6'%20d%3D'M12%204v16M8%204h8M8%2020h8'%2F%3E%3Cpath%20fill%3D'none'%20stroke%3D'%2300f3ff'%20stroke-width%3D'1.8'%20d%3D'M12%204v16M8%204h8M8%2020h8'%2F%3E%3C%2Fsvg%3E") 12 12, text !important; }
@@ -1547,14 +1572,15 @@ html[data-theme="light"] .terminal-window.os-linux .btn:hover {
 
 /* Matrix Easter Egg Overlay */
 .matrix-mode-active {
-    background-color: #001100 !important;
+    background-color: #010 !important;
     transition: background-color 1s ease;
 }
+
 .matrix-mode-active * {
     background-color: transparent !important;
-    color: #00ff00 !important;
-    border-color: #00ff00 !important;
-    text-shadow: 0 0 5px #00ff00 !important;
+    color: #0f0 !important;
+    border-color: #0f0 !important;
+    text-shadow: 0 0 5px #0f0 !important;
     box-shadow: none !important;
 }
 

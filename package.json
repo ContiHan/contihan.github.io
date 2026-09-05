@@ -1,0 +1,26 @@
+{
+  "name": "contihan.github.io",
+  "version": "1.0.0",
+  "description": "Personal portfolio of Daniel Hanák (ContiHan) — QA, Performance & Security Engineer",
+  "private": true,
+  "scripts": {
+    "serve": "http-server -p 4173 -c-1 --silent",
+    "lint": "npm run lint:html && npm run lint:css && npm run lint:js",
+    "lint:html": "htmlhint index.html 404.html",
+    "lint:css": "stylelint style.css",
+    "lint:js": "eslint script.js os-chrome.js theme-init.js",
+    "test": "playwright test",
+    "lhci": "lhci autorun"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@lhci/cli": "^0.14.0",
+    "@playwright/test": "^1.47.0",
+    "eslint": "^9.10.0",
+    "globals": "^15.9.0",
+    "htmlhint": "^1.1.4",
+    "http-server": "^14.1.1",
+    "stylelint": "^16.9.0",
+    "stylelint-config-standard": "^36.0.1"
+  }
+}

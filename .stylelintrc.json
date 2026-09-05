@@ -1,0 +1,16 @@
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "no-descending-specificity": null,
+    "declaration-block-single-line-max-declarations": null,
+    "selector-class-pattern": null,
+    "custom-property-pattern": null,
+    "keyframes-name-pattern": null,
+    "color-function-notation": null,
+    "alpha-value-notation": null,
+    "property-no-vendor-prefix": null,
+    "selector-no-vendor-prefix": null,
+    "font-family-name-quotes": null,
+    "declaration-property-value-keyword-no-deprecated": null
+  }
+}
