@@ -451,20 +451,92 @@ document.addEventListener('DOMContentLoaded', () => {
     // (OS-specific window chrome is applied by os-chrome.js, shared with 404.html)
 
     if (terminalInput) {
-        // Typing sounds
+        // Command history (ArrowUp/ArrowDown) + tab completion state
+        const commandHistory = [];
+        let historyIndex = 0; // points one past the newest entry when not navigating
+        let historyDraft = null; // unsubmitted input remembered while navigating
+        let lastListedPrefix = null; // stops repeated Tab from spamming the candidate list
+        // Deliberately excludes hidden commands (hack, sudo)
+        const completableCommands = ['help', 'whoami', 'skills', 'projects', 'contact', 'github', 'cv', 'theme', 'clear', 'secret'];
+
+        // Typing sounds + editing exits history navigation (typed text becomes
+        // the new baseline instead of being clobbered by a later ArrowDown)
         terminalInput.addEventListener('input', () => {
             playBeep(800 + Math.random() * 400, 'square', 0.02);
+            historyIndex = commandHistory.length;
+            historyDraft = null;
+            lastListedPrefix = null;
         });
+
+        function moveCaretToEnd(input) {
+            const len = input.value.length;
+            input.setSelectionRange(len, len);
+        }
 
         terminalInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const cmd = this.value.trim().toLowerCase();
                 this.value = '';
 
+                if (cmd !== '') {
+                    commandHistory.push(cmd);
+                }
+                historyIndex = commandHistory.length;
+                historyDraft = null;
+
                 echoCommand(cmd);
                 processCommand(cmd);
                 terminalBody.scrollTop = terminalBody.scrollHeight;
                 playBeep(300, 'square', 0.1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (commandHistory.length === 0 || historyIndex === 0) return;
+                if (historyDraft === null) {
+                    historyDraft = this.value;
+                }
+                historyIndex--;
+                this.value = commandHistory[historyIndex];
+                moveCaretToEnd(this);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex >= commandHistory.length) return;
+                historyIndex++;
+                if (historyIndex === commandHistory.length) {
+                    // Walked past the newest entry — restore the draft
+                    this.value = historyDraft !== null ? historyDraft : '';
+                    historyDraft = null;
+                } else {
+                    this.value = commandHistory[historyIndex];
+                }
+                moveCaretToEnd(this);
+            } else if (e.key === 'Tab' && !e.shiftKey) {
+                const current = this.value.trim().toLowerCase();
+                const matches = completableCommands.filter(c => c.startsWith(current));
+                // Nothing to complete — let Tab do its normal job so keyboard
+                // users can move focus past the terminal (no keyboard trap)
+                if (current === '' || matches.length === 0) return;
+                e.preventDefault();
+
+                if (matches.length === 1) {
+                    this.value = matches[0];
+                    moveCaretToEnd(this);
+                } else {
+                    // Complete to the longest common prefix
+                    let prefix = matches[0];
+                    for (const m of matches.slice(1)) {
+                        while (!m.startsWith(prefix)) {
+                            prefix = prefix.slice(0, -1);
+                        }
+                    }
+                    this.value = prefix;
+                    moveCaretToEnd(this);
+                    // List candidates only when completion stalls, once per prefix
+                    if (prefix === current && lastListedPrefix !== current) {
+                        lastListedPrefix = current;
+                        printTerminalText(matches.join('  '));
+                        terminalBody.scrollTop = terminalBody.scrollHeight;
+                    }
+                }
             }
         });
 
@@ -506,9 +578,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function processCommand(cmd) {
+            // The switch matches exact strings; sudo takes arguments, so catch it first
+            if (cmd === 'sudo' || cmd.startsWith('sudo ')) {
+                printTerminalText('Permission denied: nice try. This incident will be reported.');
+                return;
+            }
+
             switch(cmd) {
                 case 'help':
-                    printTerminalLine('Available commands: <br> - <span class="highlight-cmd">whoami</span>: Display user info<br> - <span class="highlight-cmd">skills</span>: List technical stack<br> - <span class="highlight-cmd">clear</span>: Clear terminal<br> - <span class="highlight-cmd">projects</span>: Jump to projects<br> - <span class="highlight-cmd">secret</span>: 🤫');
+                    printTerminalLine('Available commands: <br> - <span class="highlight-cmd">whoami</span>: Display user info<br> - <span class="highlight-cmd">skills</span>: List technical stack<br> - <span class="highlight-cmd">projects</span>: Jump to projects<br> - <span class="highlight-cmd">contact</span>: Open comm channels<br> - <span class="highlight-cmd">github</span>: Access repository index<br> - <span class="highlight-cmd">cv</span>: Transmit résumé<br> - <span class="highlight-cmd">theme</span>: Recalibrate photon emitters<br> - <span class="highlight-cmd">clear</span>: Clear terminal<br> - <span class="highlight-cmd">secret</span>: 🤫');
                     break;
                 case 'whoami':
                     printTerminalLine('404: Human not found. Running Daniel.exe...<br>I am Daniel Hanák, a QA, Performance, and Security Engineer obsessed with Data Science and AI models.');
@@ -519,6 +597,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'projects':
                     printTerminalLine('Redirecting to sector 03...');
                     setTimeout(() => document.getElementById('projects').scrollIntoView({behavior: 'smooth'}), 500);
+                    break;
+                case 'contact':
+                    printTerminalLine('Opening comm channels...<br>► Email: <a href="mailto:daniel.hanak@outlook.cz" class="highlight-cmd">daniel.hanak@outlook.cz</a><br>► GitHub: <a href="https://github.com/ContiHan" target="_blank" rel="noopener noreferrer" class="highlight-cmd">github.com/ContiHan</a><br>► LinkedIn: <a href="https://www.linkedin.com/in/daniel-han%C3%A1k-b3405864/" target="_blank" rel="noopener noreferrer" class="highlight-cmd">linkedin.com/in/daniel-hanák</a>');
+                    break;
+                case 'github':
+                    printTerminalLine('Opening repository index...<br><a href="https://github.com/ContiHan?tab=repositories" target="_blank" rel="noopener noreferrer" class="highlight-cmd">github.com/ContiHan?tab=repositories</a>');
+                    break;
+                case 'cv':
+                    printTerminalLine('Transmitting résumé...<br><a href="assets/cv_daniel_hanak.pdf" target="_blank" rel="noopener noreferrer" class="highlight-cmd">cv_daniel_hanak.pdf</a>');
+                    break;
+                case 'theme':
+                    document.getElementById('theme-toggle').click();
+                    printTerminalLine('Recalibrating photon emitters... display polarity inverted.');
                     break;
                 case 'secret':
                     printTerminalLine('🔓 <span class="highlight-cmd">Hidden protocols detected:</span><br><br>► Type <span class="highlight-cmd">hack</span> to initiate the Matrix protocol<br>► Enter the <span class="highlight-cmd">Konami Code</span> (↑↑↓↓←→←→BA — or swipe ↑↑↓↓←→←→ on mobile) for a system glitch<br>► Tap the avatar <span class="highlight-cmd">5×</span> rapidly for a surprise');

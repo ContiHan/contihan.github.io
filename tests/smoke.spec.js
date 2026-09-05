@@ -116,6 +116,118 @@ test.describe('interactive terminal', () => {
     });
 });
 
+test.describe('terminal v2', () => {
+    test('ArrowUp/ArrowDown walk the command history', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const input = page.locator('#terminal-input');
+        await input.fill('help');
+        await input.press('Enter');
+        await input.fill('whoami');
+        await input.press('Enter');
+
+        await input.press('ArrowUp');
+        await expect(input).toHaveValue('whoami');
+        await input.press('ArrowUp');
+        await expect(input).toHaveValue('help');
+        await input.press('ArrowDown');
+        await expect(input).toHaveValue('whoami');
+    });
+
+    test('Tab completes a unique prefix to the full command', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const input = page.locator('#terminal-input');
+        await input.fill('sk');
+        await input.press('Tab');
+        await expect(input).toHaveValue('skills');
+    });
+
+    test('Tab with nothing to complete moves focus on (no keyboard trap)', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const input = page.locator('#terminal-input');
+
+        await input.click();
+        await page.keyboard.press('Tab');
+        expect(await page.evaluate(() => document.activeElement && document.activeElement.id)).not.toBe('terminal-input');
+
+        await input.click();
+        await input.fill('xyz');
+        await page.keyboard.press('Tab');
+        expect(await page.evaluate(() => document.activeElement && document.activeElement.id)).not.toBe('terminal-input');
+    });
+
+    test('Tab on an ambiguous prefix keeps the common prefix and lists candidates', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const input = page.locator('#terminal-input');
+        await input.fill('c');
+        await input.press('Tab');
+        // 'contact', 'cv' and 'clear' share only 'c', so the input keeps it
+        await expect(input).toHaveValue('c');
+        await expect(page.locator('#terminal-body')).toContainText('contact cv clear');
+    });
+
+    test('theme command flips the color scheme', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const before = await page.locator('html').getAttribute('data-theme');
+        const input = page.locator('#terminal-input');
+        await input.fill('theme');
+        await input.press('Enter');
+        const after = await page.locator('html').getAttribute('data-theme');
+        expect(after).not.toBe(before);
+    });
+
+    test('sudo is refused with the permission-denied joke', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const input = page.locator('#terminal-input');
+        await input.fill('sudo rm -rf /');
+        await input.press('Enter');
+        await expect(page.locator('#terminal-body')).toContainText('Permission denied');
+        await expect(page.locator('#terminal-body')).not.toContainText('Command not found');
+    });
+
+    test('contact prints a mailto link', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const input = page.locator('#terminal-input');
+        await input.fill('contact');
+        await input.press('Enter');
+        await expect(page.locator('#terminal-body a[href^="mailto:"]')).toHaveCount(1);
+    });
+});
+
+test.describe('projects section', () => {
+    test('shows six cards including "This Website" linking to its own repo', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        await expect(page.locator('.project-card')).toHaveCount(6);
+
+        const card = page.locator('.project-card').filter({
+            has: page.locator('h3', { hasText: 'This Website' }),
+        });
+        await expect(card).toHaveCount(1);
+        await expect(card.locator('.project-overlay a')).toHaveAttribute(
+            'href',
+            /github\.com\/ContiHan\/contihan\.github\.io/,
+        );
+    });
+
+    test('the This Website card image actually loads', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const img = page.locator('.project-card img[src="assets/this_website.webp"]');
+        await img.scrollIntoViewIfNeeded();
+        // naturalWidth stays 0 for a missing or undecodable image file
+        await expect
+            .poll(() => img.evaluate((el) => el.naturalWidth))
+            .toBeGreaterThan(0);
+    });
+});
+
 test.describe('theme', () => {
     test('toggle flips the theme and persists across reload', async ({ page }) => {
         await stubGithub(page);
