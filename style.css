@@ -905,6 +905,21 @@ section {
     margin-bottom: 1rem;
 }
 
+.tag-archived {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.5rem;
+    font-family: var(--font-main);
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+}
+
 .project-info p {
     color: var(--text-secondary);
     font-size: 0.95rem;
@@ -1272,6 +1287,80 @@ body.theme-flash {
     text-align: center;
 }
 
+/* --- OS-specific terminal chrome ---
+   JS adds .os-windows / .os-linux based on the visitor's OS;
+   macOS traffic lights above are the default. */
+.terminal-window.os-windows .terminal-buttons,
+.terminal-window.os-linux .terminal-buttons {
+    order: 2;
+    margin-right: 0;
+    margin-left: 15px;
+}
+
+.terminal-window.os-windows .terminal-title,
+.terminal-window.os-linux .terminal-title {
+    order: 1;
+}
+
+.terminal-window.os-windows .terminal-title {
+    text-align: left;
+}
+
+.terminal-window.os-windows .btn,
+.terminal-window.os-linux .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    font-family: var(--font-main), sans-serif;
+    line-height: 1;
+}
+
+/* Buttons run minimize → maximize → close on non-mac systems */
+.terminal-window.os-windows .btn.minimize,
+.terminal-window.os-linux .btn.minimize { order: 1; }
+.terminal-window.os-windows .btn.maximize,
+.terminal-window.os-linux .btn.maximize { order: 2; }
+.terminal-window.os-windows .btn.close,
+.terminal-window.os-linux .btn.close { order: 3; }
+
+.terminal-window.os-windows .btn.minimize::before,
+.terminal-window.os-linux .btn.minimize::before { content: '–'; }
+.terminal-window.os-windows .btn.maximize::before,
+.terminal-window.os-linux .btn.maximize::before { content: '□'; }
+.terminal-window.os-windows .btn.close::before,
+.terminal-window.os-linux .btn.close::before { content: '×'; }
+
+/* Windows 11 flavor: flat rectangular hover targets */
+.terminal-window.os-windows .terminal-buttons { gap: 0; }
+
+.terminal-window.os-windows .btn {
+    width: 34px;
+    height: 24px;
+    border-radius: 4px;
+    color: #999;
+    font-size: 12px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.terminal-window.os-windows .btn:hover { background: rgba(255, 255, 255, 0.08); }
+.terminal-window.os-windows .btn.close:hover { background: #e81123; color: #fff; }
+
+/* Linux (GNOME/Adwaita) flavor: round grey buttons */
+.terminal-window.os-linux .terminal-buttons { gap: 8px; }
+
+.terminal-window.os-linux .btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3a3a3a;
+    color: #cfcfcf;
+    font-size: 10px;
+    transition: background-color 0.15s ease;
+}
+
+.terminal-window.os-linux .btn:hover { background: #4d4d4d; }
+
 .terminal-body {
     padding: 20px;
     color: #00ffcc;
@@ -1354,6 +1443,25 @@ html[data-theme="light"] .highlight-cmd {
     color: #cc0066;
 }
 
+html[data-theme="light"] .terminal-window.os-windows .btn {
+    color: #555;
+}
+html[data-theme="light"] .terminal-window.os-windows .btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #333;
+}
+html[data-theme="light"] .terminal-window.os-windows .btn.close:hover {
+    background: #e81123;
+    color: #fff;
+}
+html[data-theme="light"] .terminal-window.os-linux .btn {
+    background: #dadada;
+    color: #444;
+}
+html[data-theme="light"] .terminal-window.os-linux .btn:hover {
+    background: #c6c6c6;
+}
+
 /* Konami Violent Glitch */
 @keyframes konami-glitch {
     0% { filter: invert(1) hue-rotate(90deg) contrast(2); transform: translate(5px, 5px) skew(5deg); }
@@ -1374,11 +1482,18 @@ html[data-theme="light"] .highlight-cmd {
 
 
 
-/* Cyberpunk Cursors */
+/* Cyberpunk Cursors — theme-aware: cyan on dark, teal on light, both with
+   contrast understroke; pointer uses short ticks so it never hides text */
 @media (pointer: fine) {
-    body, html { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%239090ff'%20stroke-width%3D'4'%20stroke-opacity%3D'0.3'%20d%3D'M4%204l6%2016%203-7%207-3z'%2F%3E%3Cpath%20fill%3D'%23c0c0ff'%20stroke%3D'%23ffffff'%20stroke-width%3D'1'%20d%3D'M4%204l6%2016%203-7%207-3z'%2F%3E%3C%2Fsvg%3E") 4 4, default !important; }
-    a, button, .theme-toggle, .audio-toggle, .project-link, input[type="button"], input[type="submit"] { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'8'%20fill%3D'none'%20stroke%3D'%23ff00ff'%20stroke-width%3D'4'%20stroke-opacity%3D'0.4'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'3'%20fill%3D'%23ff00ff'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'8'%20fill%3D'none'%20stroke%3D'%23ff00ff'%20stroke-width%3D'1.5'%2F%3E%3Cpath%20stroke%3D'%23ff00ff'%20stroke-width%3D'1.5'%20d%3D'M12%200v6M12%2018v6M0%2012h6M18%2012h6'%2F%3E%3C%2Fsvg%3E") 12 12, pointer !important; }
-    .terminal-window, .terminal-window * { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%23ff00ff'%20stroke-width%3D'4'%20stroke-opacity%3D'0.4'%20d%3D'M12%204v16M8%204h8M8%2020h8'%2F%3E%3Cpath%20fill%3D'none'%20stroke%3D'%23ff00ff'%20stroke-width%3D'1.5'%20d%3D'M12%204v16M8%204h8M8%2020h8'%2F%3E%3C%2Fsvg%3E") 12 12, text !important; }
+    /* Dark theme (default): accent cyan with near-black understroke */
+    body, html { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%2300f3ff'%20stroke-width%3D'4'%20stroke-opacity%3D'0.35'%20d%3D'M4%204l6%2016%203-7%207-3z'%2F%3E%3Cpath%20fill%3D'%2300f3ff'%20stroke%3D'%23001018'%20stroke-width%3D'1.2'%20d%3D'M4%204l6%2016%203-7%207-3z'%2F%3E%3C%2Fsvg%3E") 4 4, default !important; }
+    a, button, .project-link, input[type="button"], input[type="submit"] { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cg%20fill%3D'none'%20stroke%3D'%23001018'%20stroke-width%3D'4'%20stroke-opacity%3D'0.6'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'7'%2F%3E%3Cpath%20d%3D'M12%202v3M12%2019v3M2%2012h3M19%2012h3'%2F%3E%3C%2Fg%3E%3Cg%20fill%3D'none'%20stroke%3D'%2300f3ff'%20stroke-width%3D'1.8'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'7'%2F%3E%3Cpath%20d%3D'M12%202v3M12%2019v3M2%2012h3M19%2012h3'%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'2.2'%20fill%3D'%2300f3ff'%2F%3E%3C%2Fsvg%3E") 12 12, pointer !important; }
+    .terminal-window, .terminal-window * { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%23001018'%20stroke-width%3D'4'%20stroke-opacity%3D'0.6'%20d%3D'M12%204v16M8%204h8M8%2020h8'%2F%3E%3Cpath%20fill%3D'none'%20stroke%3D'%2300f3ff'%20stroke-width%3D'1.8'%20d%3D'M12%204v16M8%204h8M8%2020h8'%2F%3E%3C%2Fsvg%3E") 12 12, text !important; }
+
+    /* Light theme: dark teal with white understroke */
+    html[data-theme="light"], html[data-theme="light"] body { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%23ffffff'%20stroke-width%3D'4'%20d%3D'M4%204l6%2016%203-7%207-3z'%2F%3E%3Cpath%20fill%3D'%23007a80'%20stroke%3D'%23ffffff'%20stroke-width%3D'1'%20d%3D'M4%204l6%2016%203-7%207-3z'%2F%3E%3C%2Fsvg%3E") 4 4, default !important; }
+    html[data-theme="light"] a, html[data-theme="light"] button, html[data-theme="light"] .project-link, html[data-theme="light"] input[type="button"], html[data-theme="light"] input[type="submit"] { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cg%20fill%3D'none'%20stroke%3D'%23ffffff'%20stroke-width%3D'4'%20stroke-opacity%3D'0.9'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'7'%2F%3E%3Cpath%20d%3D'M12%202v3M12%2019v3M2%2012h3M19%2012h3'%2F%3E%3C%2Fg%3E%3Cg%20fill%3D'none'%20stroke%3D'%23007a80'%20stroke-width%3D'1.8'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'7'%2F%3E%3Cpath%20d%3D'M12%202v3M12%2019v3M2%2012h3M19%2012h3'%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'2.2'%20fill%3D'%23007a80'%2F%3E%3C%2Fsvg%3E") 12 12, pointer !important; }
+    html[data-theme="light"] .terminal-window, html[data-theme="light"] .terminal-window * { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%23ffffff'%20stroke-width%3D'4'%20stroke-opacity%3D'0.9'%20d%3D'M12%204v16M8%204h8M8%2020h8'%2F%3E%3Cpath%20fill%3D'none'%20stroke%3D'%23007a80'%20stroke-width%3D'1.8'%20d%3D'M12%204v16M8%204h8M8%2020h8'%2F%3E%3C%2Fsvg%3E") 12 12, text !important; }
 }
 
 /* Matrix Easter Egg Overlay */

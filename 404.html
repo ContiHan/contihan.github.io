@@ -69,5 +69,16 @@
             </div>
         </div>
     </main>
+    <script>
+        (function () {
+            var w = document.querySelector('.terminal-window');
+            var ua = navigator.userAgent;
+            if (/Windows/i.test(ua)) {
+                w.classList.add('os-windows');
+            } else if (/Linux|X11|Android|CrOS/i.test(ua) && !/Mac OS X/i.test(ua)) {
+                w.classList.add('os-linux');
+            }
+        })();
+    </script>
 </body>
 </html>

@@ -450,6 +450,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalInput = document.getElementById('terminal-input');
     const terminalBody = document.getElementById('terminal-body');
 
+    // Window chrome matches the visitor's OS (macOS traffic lights are the default)
+    const terminalWindow = document.querySelector('.terminal-window');
+    if (terminalWindow) {
+        const ua = navigator.userAgent;
+        if (/Windows/i.test(ua)) {
+            terminalWindow.classList.add('os-windows');
+        } else if (/Linux|X11|Android|CrOS/i.test(ua) && !/Mac OS X/i.test(ua)) {
+            terminalWindow.classList.add('os-linux');
+        }
+    }
+
     if (terminalInput) {
         // Typing sounds
         terminalInput.addEventListener('input', () => {
@@ -514,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     printTerminalLine('404: Human not found. Running Daniel.exe...<br>I am Daniel Hanák, a QA, Performance, and Security Engineer obsessed with Data Science and AI models.');
                     break;
                 case 'skills':
-                    printTerminalLine('Loading skill matrix...<br>[OK] Python, Java, C#<br>[OK] Cypress, Playwright, Selenium<br>[OK] JMeter, K6, Gatling<br>[OK] SQL, NoSQL, APIs');
+                    printTerminalLine('Loading skill matrix...<br>[OK] C# — NUnit + proprietary API test framework<br>[OK] k6 performance testing (JavaScript)<br>[OK] Security — dep/vuln scans, pentest SPOC, CVE/CVSS/NIST/ASVS/NIS2<br>[OK] Python — statistics, data science, AI models<br>[OK] Azure DevOps pipelines, Pulumi');
                     break;
                 case 'projects':
                     printTerminalLine('Redirecting to sector 03...');
