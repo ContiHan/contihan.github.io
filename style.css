@@ -615,6 +615,12 @@ ul {
     margin-left: 2px;
 }
 
+/* Like a real terminal cursor: solid while keys are moving, blinks when idle */
+.typewriter-text.typing::after {
+    animation: none;
+    opacity: 1;
+}
+
 .hero-actions {
     display: flex;
     align-items: center;

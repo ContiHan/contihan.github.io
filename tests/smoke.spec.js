@@ -484,3 +484,26 @@ test.describe('improvements (Nov 2026)', () => {
         await expect(page.locator('#github-repos')).toHaveAttribute('aria-busy', 'false');
     });
 });
+
+test.describe('hero typewriter', () => {
+    test('types a full phrase with a solid cursor, then blinks while idle', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const tw = page.locator('#typewriter');
+        await expect(tw).toHaveClass(/typing/, { timeout: 3000 });
+        // typos get corrected, so the phrase always ends up exactly right
+        await expect(tw).toHaveText('Running statistical analysis...', { timeout: 20000 });
+        await expect(tw).not.toHaveClass(/typing/);
+    });
+
+    test('reduced motion shows static text without the typing animation', async ({ browser }) => {
+        const ctx = await browser.newContext({ reducedMotion: 'reduce' });
+        const page = await ctx.newPage();
+        await stubGithub(page);
+        await page.goto('/');
+        await page.waitForTimeout(1500);
+        await expect(page.locator('#typewriter')).toHaveText('Running statistical analysis...');
+        await expect(page.locator('#typewriter')).not.toHaveClass(/typing/);
+        await ctx.close();
+    });
+});

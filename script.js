@@ -46,6 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     // 1. Typewriter Effect
     // ===========================================
+    // Models a human typist instead of uniform random delays. Timings follow
+    // Dhakal et al., "Observations on Typing from 136 Million Keystrokes"
+    // (CHI 2018): the average typist does 52 WPM with ~239 ms between
+    // keystrokes, intervals are right-skewed with a ~60 ms floor, and errors
+    // are mostly substitutions (1.65%), then omissions (0.8%), insertions (0.67%).
     const typewriterElement = document.getElementById('typewriter');
     const texts = [
         "Running statistical analysis...",
@@ -53,43 +58,198 @@ document.addEventListener('DOMContentLoaded', () => {
         "Executing performance tests...",
         "May the Force be with you."
     ];
-    let textIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
-    let typingSpeed = 100;
 
-    function typeWriter() {
-        const currentText = texts[textIndex];
+    const TYPE_WPM = 77;                      // target speed (study average: 52)
+    const TYPE_TEMPO = 52 / TYPE_WPM;         // timings below are calibrated at 52 WPM
+    const TYPE_BASE_IKI_MS = 200;             // median keystroke interval at 52 WPM
+    const TYPE_MIN_IKI_MS = 60;               // physical floor observed in the study
+    const TYPE_ERROR_CHANCE = 0.65;           // share of phrases that get one typo
+    const TYPE_HOLD_MS = [1900, 2600];        // reading pause before deleting
+    const TYPE_NEXT_MS = [380, 750];          // pause before the next phrase
+    const BACKSPACE_REPEAT_DELAY_MS = [330, 420]; // OS key-repeat delay (held Backspace)
+    const BACKSPACE_REPEAT_MS = [31, 37];         // OS key-repeat rate
 
-        if (isDeleting) {
-            typewriterElement.textContent = currentText.substring(0, charIndex - 1);
-            charIndex--;
-            typingSpeed = 50;
-        } else {
-            typewriterElement.textContent = currentText.substring(0, charIndex + 1);
-            charIndex++;
-            typingSpeed = Math.floor(Math.random() * 70) + 30;
-            if (Math.random() < 0.1) {
-                typingSpeed += Math.floor(Math.random() * 250) + 100;
+    // Error kinds, weighted by the study's error mix; three span several characters
+    const TYPO_KINDS = [
+        ['neighbor', 28],   // one wrong key next to the right one
+        ['handShift', 15],  // 2–4 letters typed with the hand shifted one key over
+        ['swap', 10],       // two letters transposed ("teh")
+        ['omit', 26],       // a letter skipped, noticed a few letters later
+        ['insert', 21],     // an extra letter (doubled or neighbor)
+    ];
+    const KEY_NEIGHBORS = {
+        a: 'qwsz', b: 'vghn', c: 'xdfv', d: 'serfcx', e: 'wsdr', f: 'drtgvc', g: 'ftyhbv',
+        h: 'gyujnb', i: 'ujko', j: 'huikmn', k: 'jiolm', l: 'kop', m: 'njk', n: 'bhjm',
+        o: 'iklp', p: 'ol', q: 'wa', r: 'edft', s: 'awedxz', t: 'rfgy', u: 'yhji',
+        v: 'cfgb', w: 'qase', x: 'zsdc', y: 'tghu', z: 'asx'
+    };
+    const KEY_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    const between = (min, max) => min + Math.random() * (max - min);
+    const pickOne = (list) => list[Math.floor(Math.random() * list.length)];
+
+    // Standard normal sample (Box–Muller) for log-normal keystroke intervals
+    function gaussian() {
+        let u = 0, v = 0;
+        while (!u) u = Math.random();
+        while (!v) v = Math.random();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    function shiftedKey(ch, dir) {
+        for (const row of KEY_ROWS) {
+            const i = row.indexOf(ch);
+            if (i >= 0) return row[i + dir] || row[i - dir];
+        }
+        return ch;
+    }
+
+    // Per character: position inside its word (0 = not a letter) and how many
+    // lowercase letters follow from here to the end of the word
+    function analyzeWords(text) {
+        const pos = [];
+        const lettersLeft = [];
+        let p = 0;
+        for (let i = 0; i < text.length; i++) {
+            p = /[A-Za-z]/.test(text[i]) ? p + 1 : 0;
+            pos.push(p);
+        }
+        for (let i = 0; i < text.length; i++) {
+            let k = 0;
+            while (/[a-z]/.test(text[i + k] || '')) k++;
+            lettersLeft.push(k);
+        }
+        return { pos, lettersLeft };
+    }
+
+    // Delay before a keystroke, in ms
+    function keystrokeDelay(ch, prev, posInWord, slowdown) {
+        let d = TYPE_BASE_IKI_MS * Math.exp(0.35 * gaussian());
+        if (posInWord >= 3) d *= 0.92;                        // flow inside a word
+        if (ch === prev && /[a-z]/.test(ch)) d *= 0.8;        // repeated letter is quicker
+        if (ch === ' ') d *= 0.85;                            // thumb on the space bar
+        if (prev === ' ' && ch !== ' ') {
+            d += Math.random() < 0.6 ? between(120, 350) : between(20, 80); // next word
+        }
+        if (/[A-Z]/.test(ch)) d += between(80, 160);          // Shift
+        if (ch === '.') d = prev === '.' ? d * 0.75 : d + between(150, 350);
+        return Math.max(d * TYPE_TEMPO * slowdown, TYPE_MIN_IKI_MS);
+    }
+
+    // Decide whether (and where) this phrase gets a typo
+    function planTypo(text, words) {
+        if (Math.random() > TYPE_ERROR_CHANCE) return null;
+        let roll = Math.random() * 100;
+        let kind = TYPO_KINDS[0][0];
+        for (const [k, weight] of TYPO_KINDS) {
+            if (roll < weight) { kind = k; break; }
+            roll -= weight;
+        }
+        const lettersNeeded = { neighbor: 1, handShift: 2, swap: 2, omit: 3, insert: 1 }[kind];
+        const candidates = [];
+        for (let i = 0; i < text.length; i++) {
+            if (words.pos[i] >= 2 && KEY_NEIGHBORS[text[i]] && words.lettersLeft[i] >= lettersNeeded &&
+                !(kind === 'swap' && text[i] === text[i + 1])) {
+                candidates.push(i);
             }
         }
+        return candidates.length ? { at: pickOne(candidates), kind } : null;
+    }
 
-        if (!isDeleting && charIndex === currentText.length) {
-            isDeleting = true;
-            typingSpeed = 2000;
-        } else if (isDeleting && charIndex === 0) {
-            isDeleting = false;
-            textIndex = (textIndex + 1) % texts.length;
-            typingSpeed = 500;
+    // What actually gets typed instead of the correct letters, and how many it replaces
+    function typoKeystrokes(text, i, kind, words) {
+        const ch = text[i];
+        switch (kind) {
+            case 'neighbor':
+                return { typed: pickOne(KEY_NEIGHBORS[ch]), replaces: 1 };
+            case 'handShift': {
+                const count = Math.min(words.lettersLeft[i], 2 + Math.floor(Math.random() * 3));
+                const dir = Math.random() < 0.5 ? 1 : -1;
+                let typed = '';
+                for (let j = 0; j < count; j++) typed += shiftedKey(text[i + j], dir);
+                return { typed, replaces: count };
+            }
+            case 'swap':
+                return { typed: text[i + 1] + ch, replaces: 2 };
+            case 'omit':
+                return { typed: '', replaces: 1 };
+            default: // insert
+                return { typed: ch + (Math.random() < 0.5 ? ch : pickOne(KEY_NEIGHBORS[ch])), replaces: 1 };
         }
+    }
 
-        setTimeout(typeWriter, typingSpeed);
+    async function typePhrase(text) {
+        const words = analyzeWords(text);
+        let typo = planTypo(text, words);
+        let shown = '';
+        let carefulKeys = 0; // typing slows down for a few keys after a correction
+
+        const press = async (ch, prev, posInWord) => {
+            await sleep(keystrokeDelay(ch, prev, posInWord, carefulKeys > 0 ? 1.15 : 1));
+            if (carefulKeys > 0) carefulKeys--;
+            shown += ch;
+            typewriterElement.textContent = shown;
+        };
+
+        for (let i = 0; i < text.length; i++) {
+            if (typo && typo.at === i) {
+                const { typed, replaces } = typoKeystrokes(text, i, typo.kind, words);
+                // Keep going for a few letters before noticing (always ≥1 for an
+                // omission, otherwise the mistake would never be visible)
+                const lettersAfter = words.lettersLeft[i] - replaces;
+                const keepGoing = Math.min(lettersAfter, (typo.kind === 'omit' ? 1 : 0) + Math.floor(Math.random() * 3));
+                const wrong = typed + text.slice(i + replaces, i + replaces + keepGoing);
+
+                for (let j = 0; j < wrong.length; j++) {
+                    await press(wrong[j], j ? wrong[j - 1] : text[i - 1], words.pos[i] + j);
+                }
+                await sleep(between(350, 750) * TYPE_TEMPO);             // "wait, that's wrong"
+                for (let j = 0; j < wrong.length; j++) {                 // deliberate Backspace taps
+                    await sleep(Math.max(between(150, 220) * TYPE_TEMPO, TYPE_MIN_IKI_MS));
+                    shown = shown.slice(0, -1);
+                    typewriterElement.textContent = shown;
+                }
+                await sleep(between(150, 280));
+                carefulKeys = 3;
+                typo = null;
+            }
+            await press(text[i], text[i - 1] || ' ', words.pos[i]);
+        }
+    }
+
+    // Held Backspace: one deletion, the OS repeat delay, then fast auto-repeat
+    async function holdBackspace(text) {
+        let shown = text.slice(0, -1);
+        typewriterElement.textContent = shown;
+        await sleep(between(...BACKSPACE_REPEAT_DELAY_MS));
+        while (shown.length) {
+            shown = shown.slice(0, -1);
+            typewriterElement.textContent = shown;
+            await sleep(between(...BACKSPACE_REPEAT_MS));
+        }
+    }
+
+    async function runTypewriter() {
+        await sleep(1000);
+        for (let i = 0; ; i = (i + 1) % texts.length) {
+            // Solid cursor while keys are moving, blinking only when idle
+            typewriterElement.classList.add('typing');
+            await typePhrase(texts[i]);
+            typewriterElement.classList.remove('typing');
+            await sleep(between(...TYPE_HOLD_MS));
+
+            typewriterElement.classList.add('typing');
+            await holdBackspace(texts[i]);
+            typewriterElement.classList.remove('typing');
+            await sleep(between(...TYPE_NEXT_MS));
+        }
     }
 
     if (prefersReducedMotion) {
         typewriterElement.textContent = texts[0];
     } else {
-        setTimeout(typeWriter, 1000);
+        runTypewriter();
     }
 
 
