@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect, devices } = require('@playwright/test');
 const { AxeBuilder } = require('@axe-core/playwright');
 
 // GitHub API is stubbed in every test: no rate-limit flakiness in CI, and the
@@ -395,5 +395,92 @@ test.describe('regressions (Nov 2026 bug sweep)', () => {
         await stubGithub(page, [{ ...FAKE_REPOS[0], html_url: 'javascript:window.__jsurl=1' }]);
         await page.goto('/');
         await expect(page.locator('.github-card a')).toHaveAttribute('href', /^https:\/\/github\.com\//);
+    });
+});
+
+test.describe('improvements (Nov 2026)', () => {
+    test.describe('reduced motion', () => {
+        test.use({ reducedMotion: 'reduce' });
+
+        test('Matrix shows the static green mode without rain, Escape ends it', async ({ page }) => {
+            await stubGithub(page);
+            await page.goto('/');
+            await page.keyboard.type('hack');
+            await expect(page.locator('#matrix-overlay')).toHaveCount(1);
+            await expect(page.locator('#matrix-overlay canvas')).toHaveCount(0);
+            await expect(page.locator('body')).toHaveClass(/matrix-mode-active/);
+            await page.keyboard.press('Escape');
+            await expect(page.locator('#matrix-overlay')).toHaveCount(0);
+            await expect(page.locator('body')).not.toHaveClass(/matrix-mode-active/);
+            expect(await page.evaluate(() => document.body.style.position)).toBe('');
+        });
+
+        test('Konami covers the screen in one step instead of cascading', async ({ page }) => {
+            await stubGithub(page);
+            await page.goto('/');
+            for (const key of ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']) {
+                await page.keyboard.press(key);
+            }
+            // the animated cascade needs 800ms to place all five stripes
+            await expect(page.locator('#konami-overlay > div')).toHaveCount(5, { timeout: 400 });
+            await expect(page.locator('#konami-overlay')).toHaveCount(0, { timeout: 5000 });
+        });
+    });
+
+    test('tapping the avatar on a touch screen leaves no stuck hover zoom', async ({ browser }) => {
+        const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+        const page = await ctx.newPage();
+        await stubGithub(page);
+        await page.goto('/');
+        await page.locator('.profile-glitch-container').tap();
+        await expect(page.locator('.profile-glitch-container')).toHaveCSS('transform', 'none');
+        await ctx.close();
+    });
+
+    test('theme toggle label announces the action it will perform', async ({ page }) => {
+        await page.emulateMedia({ colorScheme: 'dark' });
+        await stubGithub(page);
+        await page.goto('/');
+        const toggle = page.locator('#theme-toggle');
+        await expect(toggle).toHaveAttribute('aria-label', 'Switch to light theme');
+        await toggle.click();
+        await expect(toggle).toHaveAttribute('aria-label', 'Switch to dark theme');
+    });
+
+    test('theme follows OS changes until the visitor picks one', async ({ page }) => {
+        await page.emulateMedia({ colorScheme: 'dark' });
+        await stubGithub(page);
+        await page.goto('/');
+        const html = page.locator('html');
+        await expect(html).toHaveAttribute('data-theme', 'dark');
+        await page.emulateMedia({ colorScheme: 'light' });
+        await expect(html).toHaveAttribute('data-theme', 'light');
+
+        // an explicit choice wins over later OS switches
+        await page.locator('#theme-toggle').click();
+        await expect(html).toHaveAttribute('data-theme', 'dark');
+        await page.emulateMedia({ colorScheme: 'dark' });
+        await page.emulateMedia({ colorScheme: 'light' });
+        await expect(html).toHaveAttribute('data-theme', 'dark');
+    });
+
+    test('repeating a command adds a single history entry', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const input = page.locator('#terminal-input');
+        for (const cmd of ['whoami', 'help', 'help']) {
+            await input.fill(cmd);
+            await input.press('Enter');
+        }
+        await input.press('ArrowUp');
+        await expect(input).toHaveValue('help');
+        await input.press('ArrowUp');
+        await expect(input).toHaveValue('whoami');
+    });
+
+    test('GitHub grid clears aria-busy once loaded', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        await expect(page.locator('#github-repos')).toHaveAttribute('aria-busy', 'false');
     });
 });

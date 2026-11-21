@@ -126,16 +126,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
-    // Sun/moon live in the shared sprite — swap the <use> reference
-    // (and keep the mobile browser toolbar color in sync with the theme)
+    // Sun/moon live in the shared sprite — swap the <use> reference, keep the
+    // mobile browser toolbar color in sync, and say what the button WILL do
     function updateIcon(theme) {
-        themeIconUse.setAttribute('href', theme === 'light' ? 'assets/icons.svg#i-moon' : 'assets/icons.svg#i-sun');
-        if (themeColorMeta) themeColorMeta.setAttribute('content', theme === 'light' ? '#f4f4f5' : '#050505');
+        const isLight = theme === 'light';
+        themeIconUse.setAttribute('href', isLight ? 'assets/icons.svg#i-moon' : 'assets/icons.svg#i-sun');
+        themeToggleBtn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+        if (themeColorMeta) themeColorMeta.setAttribute('content', isLight ? '#f4f4f5' : '#050505');
     }
 
-    // Theme attribute is already set pre-paint by the inline script in <head>;
+    // Theme attribute is already set pre-paint by theme-init.js in <head>;
     // here we only sync the icon with it.
     updateIcon(htmlElement.getAttribute('data-theme') || 'dark');
+
+    // Until the visitor picks a theme explicitly, follow OS light/dark switches live
+    const hasStoredTheme = () => {
+        try {
+            return localStorage.getItem('theme') !== null;
+        } catch (e) {
+            return false;
+        }
+    };
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+        if (hasStoredTheme()) return;
+        const osTheme = e.matches ? 'light' : 'dark';
+        htmlElement.setAttribute('data-theme', osTheme);
+        updateIcon(osTheme);
+    });
 
     let themeFlashTimeout;
     themeToggleBtn.addEventListener('click', () => {
@@ -544,7 +561,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cmd = raw.toLowerCase();
                 this.value = '';
 
-                if (raw !== '') {
+                // Like bash's ignoredups: repeating a command adds one history entry
+                if (raw !== '' && commandHistory[commandHistory.length - 1] !== raw) {
                     commandHistory.push(raw);
                 }
                 historyIndex = commandHistory.length;
@@ -823,6 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY));
             if (cached && Array.isArray(cached.repos) && Date.now() - cached.time < CACHE_TTL) {
                 renderGithubRepos(cached.repos, reposContainer);
+                reposContainer.setAttribute('aria-busy', 'false');
                 return;
             }
         } catch (e) { /* bad/absent cache — fetch fresh */ }
@@ -839,6 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) { /* storage unavailable */ }
 
             renderGithubRepos(repos, reposContainer);
+            reposContainer.setAttribute('aria-busy', 'false');
         } catch (error) {
             console.error('Error fetching repos:', error);
             reposContainer.innerHTML = '';
@@ -851,6 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
             profileLink.textContent = 'Browse repositories on GitHub →';
             fallback.appendChild(profileLink);
             reposContainer.appendChild(fallback);
+            reposContainer.setAttribute('aria-busy', 'false');
         }
     };
 
@@ -871,6 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MATRIX_RAIN_MS = 5000;   // how long new drops keep spawning
     const MATRIX_FRAME_MS = 33;    // ~30 fps
     const MATRIX_FADE_MS = 1000;   // canvas fade-out before cleanup
+    const MATRIX_STATIC_MS = 2500; // reduced motion: how long the static green mode lasts
 
     function activateMatrix() {
         // Prevent double-trigger
@@ -882,9 +904,30 @@ document.addEventListener('DOMContentLoaded', () => {
         // Phase 1: Smooth transition to green
         document.body.classList.add('matrix-mode-active');
 
-        // Create overlay with canvas (hidden at first)
         const overlay = document.createElement('div');
         overlay.id = 'matrix-overlay';
+
+        // Reduced motion: keep the green "Matrix mode" but skip the falling rain.
+        // The empty overlay still acts as the double-trigger guard.
+        if (prefersReducedMotion) {
+            overlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;';
+            document.body.appendChild(overlay);
+            const endStatic = () => {
+                clearTimeout(staticTimer);
+                document.removeEventListener('keydown', escStatic);
+                overlay.remove();
+                document.body.classList.remove('matrix-mode-active');
+                unlockScroll();
+            };
+            const escStatic = (e) => {
+                if (e.key === 'Escape') endStatic();
+            };
+            document.addEventListener('keydown', escStatic);
+            const staticTimer = setTimeout(endStatic, MATRIX_STATIC_MS);
+            return;
+        }
+
+        // Create overlay with canvas (hidden at first)
         overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999999;pointer-events:none;opacity:0;transition:opacity 0.5s ease;';
 
         // Device-pixel-ratio-aware canvas — crisp rain on retina/mobile screens
@@ -1014,6 +1057,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const blockHeight = 100 / KONAMI_BLOCKS;
         const blockEls = [];
+        // Reduced motion: no cascading stripes — the screen covers and clears
+        // in one step (the sounds keep their own pacing above/below)
+        const blockInStep = prefersReducedMotion ? 0 : KONAMI_BLOCK_IN_MS;
+        const blockOutStep = prefersReducedMotion ? 0 : KONAMI_BLOCK_OUT_MS;
 
         // Pixelate down — blocks slide in from top
         for (let i = 0; i < KONAMI_BLOCKS; i++) {
@@ -1028,8 +1075,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 block.style.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,255,0,0.1) 10px, rgba(0,255,0,0.1) 20px)';
                 crashOverlay.appendChild(block);
                 blockEls.push(block);
-                playBeep(100 + i * 40, 'square', 0.08);
-            }, i * KONAMI_BLOCK_IN_MS);
+            }, i * blockInStep);
+            setTimeout(() => playBeep(100 + i * 40, 'square', 0.08), i * KONAMI_BLOCK_IN_MS);
         }
 
         // Pixelate up — blocks removed from bottom
@@ -1039,11 +1086,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     playBeep(pitchUp, 'square', 0.1);
                     pitchUp += 30;
+                }, i * KONAMI_BLOCK_OUT_MS);
+                setTimeout(() => {
                     if (blockEls.length > 0) {
                         const b = blockEls.pop();
                         b.remove();
                     }
-                }, i * KONAMI_BLOCK_OUT_MS);
+                }, i * blockOutStep);
             }
 
             // Cleanup
