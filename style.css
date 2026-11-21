@@ -643,8 +643,10 @@ ul {
     border: 1px solid var(--text-secondary);
 }
 
+/* Solid accent fill: the old 40%-alpha glow fill left dark-on-teal text at
+   ~2.9:1 (dark theme) and near-white-on-pale-teal at ~1.3:1 (light theme) */
 .cyber-button:hover {
-    background: var(--accent-glow);
+    background: var(--accent-color);
     color: var(--bg-color);
     box-shadow: 0 0 20px var(--accent-glow);
 }
@@ -782,6 +784,7 @@ section {
     transform: translateX(10px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     border-color: var(--accent-glow);
+    border-left-color: var(--accent-color); /* keep the solid accent stripe */
 }
 
 .stat-icon {
@@ -872,12 +875,19 @@ section {
     overflow: hidden;
 }
 
+/* Target width comes from the inline --w; with JS the bar starts empty and
+   fills when scrolled into view (.filled), without JS it just shows the value */
 .progress {
+    width: var(--w, 0%);
     height: 100%;
     background: var(--accent-color);
     box-shadow: 0 0 10px var(--accent-glow);
     position: relative;
     transition: width 1.5s cubic-bezier(0.1, 0.7, 0.1, 1);
+}
+
+.js .progress:not(.filled) {
+    width: 0%;
 }
 
 
@@ -930,6 +940,11 @@ section {
 }
 
 .project-overlay {
+    /* The overlay is dark in both themes, so it always uses the dark palette:
+       light-theme teal on this near-black scrim was only ~2.3–3.4:1 */
+    --accent-color: #00f3ff;
+    --bg-color: #050505;
+
     position: absolute;
     top: 0;
     left: 0;
@@ -943,7 +958,9 @@ section {
     transition: opacity 0.3s;
 }
 
-.project-card:hover .project-overlay {
+/* :focus-within — keyboard users tabbing to the link must actually see it */
+.project-card:hover .project-overlay,
+.project-card:focus-within .project-overlay {
     opacity: 1;
 }
 
@@ -958,13 +975,31 @@ section {
     background: rgba(0,0,0,0.5);
 }
 
-.project-card:hover .project-link {
+.project-card:hover .project-link,
+.project-card:focus-within .project-link {
     transform: translateY(0);
 }
 
-.project-link:hover:not(.disabled) {
+.project-link:hover {
     background: var(--accent-color);
     color: var(--bg-color);
+}
+
+/* Touch screens have no hover: the link used to be invisible yet tappable.
+   Show it as a badge in the image corner, without darkening the picture. */
+@media (hover: none) {
+    .project-overlay {
+        opacity: 1;
+        background: transparent;
+        align-items: flex-end;
+        justify-content: flex-end;
+        padding: 1rem;
+    }
+
+    .project-link {
+        transform: none;
+        background: rgba(5, 5, 5, 0.85);
+    }
 }
 
 .project-info {
@@ -1039,13 +1074,16 @@ footer {
 /* =========================================
    Animations & Utilities
 ========================================= */
-.section-reveal {
+
+/* Hidden start state only when JS runs (theme-init.js adds .js) — without JS
+   the IntersectionObserver never fires and the content must stay visible */
+.js .section-reveal {
     opacity: 0;
     transform: translateY(50px);
-    transition: all 0.8s ease-out;
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
-.section-reveal.active {
+.js .section-reveal.active {
     opacity: 1;
     transform: translateY(0);
 }
@@ -1224,7 +1262,11 @@ footer {
         -webkit-backdrop-filter: blur(15px);
         align-items: center;
         justify-content: center;
-        transition: top 0.4s ease-in-out;
+
+        /* visibility keeps the off-screen links out of the Tab order while closed;
+           its delayed switch lets the slide-up finish before hiding */
+        visibility: hidden;
+        transition: top 0.4s ease-in-out, visibility 0s linear 0.4s;
         z-index: 1000;
     }
     
@@ -1234,6 +1276,8 @@ footer {
     
     .nav-links.active {
         top: 0;
+        visibility: visible;
+        transition: top 0.4s ease-in-out, visibility 0s;
     }
     
     .nav-link {
@@ -1513,27 +1557,6 @@ body.theme-flash {
     text-shadow: var(--terminal-input-glow);
 }
 
-/* Konami Violent Glitch */
-@keyframes konami-glitch {
-    0% { filter: invert(1) hue-rotate(90deg) contrast(2); transform: translate(5px, 5px) skew(5deg); }
-    10% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-5px, -5px) skew(-5deg); }
-    20% { filter: invert(1) hue-rotate(180deg) contrast(3); transform: translate(10px, 0) skew(10deg) scale(1.05); }
-    30% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-10px, 10px) skew(-10deg); }
-    40% { filter: hue-rotate(270deg) contrast(2); transform: translate(5px, -10px) skew(5deg) scale(0.95); }
-    50% { filter: invert(1) hue-rotate(90deg) contrast(2); transform: translate(-5px, 5px) skew(-5deg); }
-    60% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(10px, -5px) skew(10deg); }
-    70% { filter: hue-rotate(180deg) contrast(3); transform: translate(-10px, 0) skew(-10deg) scale(1.05); }
-    80% { filter: invert(1) hue-rotate(270deg) contrast(2); transform: translate(5px, 10px) skew(5deg); }
-    90% { filter: invert(0) hue-rotate(0deg) contrast(1); transform: translate(-5px, -10px) skew(-5deg) scale(0.95); }
-    100% { filter: none; transform: none; }
-}
-
-.konami-active {
-    animation: konami-glitch 0.3s infinite;
-}
-
-
-
 /* Cyberpunk Cursors — theme-aware: cyan on dark, teal on light, both with
    contrast understroke; pointer uses short ticks so it never hides text */
 @media (pointer: fine) {
@@ -1583,7 +1606,7 @@ body.theme-flash {
         scroll-behavior: auto;
     }
 
-    .section-reveal {
+    .js .section-reveal {
         opacity: 1;
         transform: none;
     }

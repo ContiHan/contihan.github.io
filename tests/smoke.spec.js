@@ -299,3 +299,101 @@ test.describe('404 page', () => {
         await expect(page).toHaveURL(/\/$|index\.html/);
     });
 });
+
+test.describe('regressions (Nov 2026 bug sweep)', () => {
+    test('tall Projects section still reveals on a landscape phone', async ({ browser }) => {
+        // threshold 0.15 of a ~3300px section can never fit a 360px-tall viewport
+        const ctx = await browser.newContext({ viewport: { width: 740, height: 360 } });
+        const page = await ctx.newPage();
+        await stubGithub(page);
+        await page.goto('/');
+        await page.evaluate(() => document.getElementById('projects').scrollIntoView());
+        await expect(page.locator('#projects .section-reveal')).toHaveClass(/active/);
+        await ctx.close();
+    });
+
+    test('content and skill bars stay visible with JavaScript disabled', async ({ browser }) => {
+        const ctx = await browser.newContext({ javaScriptEnabled: false });
+        const page = await ctx.newPage();
+        await page.goto('/');
+        const state = await page.locator('#skills').evaluate((s) => ({
+            opacity: getComputedStyle(s.querySelector('.section-reveal')).opacity,
+            barWidth: s.querySelector('.progress').getBoundingClientRect().width,
+        }));
+        expect(state.opacity).toBe('1');
+        expect(state.barWidth).toBeGreaterThan(0);
+        await ctx.close();
+    });
+
+    test.describe('mobile menu', () => {
+        test.use({ viewport: { width: 800, height: 900 } });
+
+        test('widening the window with the menu open releases the scroll lock', async ({ page }) => {
+            await stubGithub(page);
+            await page.goto('/');
+            await page.locator('.hamburger').click();
+            expect(await page.evaluate(() => document.body.style.position)).toBe('fixed');
+            await page.setViewportSize({ width: 1280, height: 900 });
+            await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe('');
+        });
+
+        test('Escape closes the menu and closed links are hidden from Tab', async ({ page }) => {
+            await stubGithub(page);
+            await page.goto('/');
+            const menu = page.locator('.nav-links');
+            await expect(menu).toHaveCSS('visibility', 'hidden');
+            await page.locator('.hamburger').click();
+            await expect(menu).toHaveCSS('visibility', 'visible');
+            await page.keyboard.press('Escape');
+            await expect(page.locator('.hamburger')).toHaveAttribute('aria-expanded', 'false');
+            await expect(page.locator('.hamburger')).toBeFocused();
+            await expect(menu).toHaveCSS('visibility', 'hidden');
+        });
+    });
+
+    test('keyboard focus on a project link reveals its overlay', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        await page.locator('.project-link').first().focus();
+        await expect(page.locator('.project-overlay').first()).toHaveCSS('opacity', '1');
+    });
+
+    test('selecting terminal output text is not wiped by the focus-on-click', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const line = page.locator('#terminal-body .terminal-line').first();
+        await line.scrollIntoViewIfNeeded();
+        await line.click({ clickCount: 3 });
+        expect((await page.evaluate(() => window.getSelection().toString())).trim()).toBe('Login successful.');
+    });
+
+    test('terminal echoes the original casing but matches commands case-insensitively', async ({ page }) => {
+        await stubGithub(page);
+        await page.goto('/');
+        const input = page.locator('#terminal-input');
+        await input.fill('HELP');
+        await input.press('Enter');
+        await expect(page.locator('#terminal-body')).toContainText('contihan@mainframe:~$ HELP');
+        await expect(page.locator('#terminal-body')).toContainText('Available commands');
+    });
+
+    test('3D card tilt is disabled under prefers-reduced-motion', async ({ browser }) => {
+        const ctx = await browser.newContext({ reducedMotion: 'reduce' });
+        const page = await ctx.newPage();
+        await stubGithub(page);
+        await page.goto('/');
+        const card = page.locator('.project-card').first();
+        await card.scrollIntoViewIfNeeded();
+        const box = await card.boundingBox();
+        await page.mouse.move(box.x + 10, box.y + 10);
+        await page.mouse.move(box.x + 20, box.y + 20);
+        expect(await card.evaluate((el) => el.style.transform)).toBe('');
+        await ctx.close();
+    });
+
+    test('GitHub cards never link outside github.com', async ({ page }) => {
+        await stubGithub(page, [{ ...FAKE_REPOS[0], html_url: 'javascript:window.__jsurl=1' }]);
+        await page.goto('/');
+        await expect(page.locator('.github-card a')).toHaveAttribute('href', /^https:\/\/github\.com\//);
+    });
+});

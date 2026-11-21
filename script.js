@@ -106,9 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // threshold 0 + negative bottom margin: a ratio-based threshold (e.g. 0.15)
+    // can never be met by a section taller than ~6.5 viewports — the Projects
+    // section on a landscape phone stayed invisible forever.
     const revealObserver = new IntersectionObserver(revealCallback, {
-        threshold: 0.15,
-        rootMargin: "0px 0px -50px 0px"
+        threshold: 0,
+        rootMargin: "0px 0px -15% 0px"
     });
 
     revealElements.forEach(el => revealObserver.observe(el));
@@ -121,9 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const htmlElement = document.documentElement;
     const themeIconUse = themeToggleBtn.querySelector('use');
 
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
     // Sun/moon live in the shared sprite — swap the <use> reference
+    // (and keep the mobile browser toolbar color in sync with the theme)
     function updateIcon(theme) {
         themeIconUse.setAttribute('href', theme === 'light' ? 'assets/icons.svg#i-moon' : 'assets/icons.svg#i-sun');
+        if (themeColorMeta) themeColorMeta.setAttribute('content', theme === 'light' ? '#f4f4f5' : '#050505');
     }
 
     // Theme attribute is already set pre-paint by the inline script in <head>;
@@ -163,9 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const bar = entry.target;
-                bar.style.width = bar.getAttribute('data-width');
-                observer.unobserve(bar);
+                // Target width lives in the inline --w custom property, so the
+                // bars show their real values even without JS
+                entry.target.classList.add('filled');
+                observer.unobserve(entry.target);
             }
         });
     }, { threshold: 0.5 });
@@ -257,26 +265,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.nav-link');
 
     if (hamburger && navLinks) {
+        const isMenuOpen = () => navLinks.classList.contains('active');
+
+        const openMenu = () => {
+            if (isMenuOpen()) return;
+            hamburger.classList.add('active');
+            navLinks.classList.add('active');
+            hamburger.setAttribute('aria-expanded', 'true');
+            lockScroll();
+        };
+
+        const closeMenu = () => {
+            if (!isMenuOpen()) return;
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
+            unlockScroll();
+        };
+
         hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('active');
-            const isOpen = navLinks.classList.contains('active');
-            hamburger.setAttribute('aria-expanded', String(isOpen));
-            if (isOpen) {
-                lockScroll();
-            } else {
-                unlockScroll();
+            if (isMenuOpen()) closeMenu(); else openMenu();
+        });
+
+        navItems.forEach(item => item.addEventListener('click', closeMenu));
+
+        // Escape closes the menu and returns focus to the toggle
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isMenuOpen()) {
+                closeMenu();
+                hamburger.focus();
             }
         });
 
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const wasOpen = navLinks.classList.contains('active');
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-                hamburger.setAttribute('aria-expanded', 'false');
-                if (wasOpen) unlockScroll();
-            });
+        // Widening past the breakpoint (rotation, window resize) hides the
+        // hamburger — close the menu, otherwise the page stays scroll-locked
+        const mobileNavQuery = window.matchMedia('(max-width: 900px)');
+        mobileNavQuery.addEventListener('change', (e) => {
+            if (!e.matches) closeMenu();
         });
     }
 
@@ -510,18 +535,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         terminalInput.addEventListener('keydown', function(e) {
+            // Enter/arrows during IME composition (CJK input) belong to the IME
+            if (e.isComposing) return;
+
             if (e.key === 'Enter') {
-                const cmd = this.value.trim().toLowerCase();
+                // Echo what the user actually typed; match commands case-insensitively
+                const raw = this.value.trim();
+                const cmd = raw.toLowerCase();
                 this.value = '';
 
-                if (cmd !== '') {
-                    commandHistory.push(cmd);
+                if (raw !== '') {
+                    commandHistory.push(raw);
                 }
                 historyIndex = commandHistory.length;
                 historyDraft = null;
 
-                echoCommand(cmd);
-                processCommand(cmd);
+                echoCommand(raw);
+                processCommand(cmd, raw);
                 terminalBody.scrollTop = terminalBody.scrollHeight;
                 playBeep(300, 'square', 0.1);
             } else if (e.key === 'ArrowUp') {
@@ -613,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
             insertTerminalLine(div);
         }
 
-        function processCommand(cmd) {
+        function processCommand(cmd, raw = cmd) {
             // The switch matches exact strings; sudo takes arguments, so catch it first
             if (cmd === 'sudo' || cmd.startsWith('sudo ')) {
                 printTerminalText('Permission denied: nice try. This incident will be reported.');
@@ -662,14 +692,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 case '':
                     break;
                 default:
-                    printTerminalText(`Command not found: ${cmd}. Type 'help' for available commands.`);
+                    printTerminalText(`Command not found: ${raw}. Type 'help' for available commands.`);
             }
         }
 
-        // Click terminal to focus input
+        // Click terminal to focus input — but not when the click ended a text
+        // selection (focusing the input would wipe it, e.g. copying the email)
         const termWin = document.querySelector('.terminal-window');
         if (termWin) {
             termWin.addEventListener('click', () => {
+                const selection = window.getSelection();
+                if (selection && !selection.isCollapsed) return;
                 terminalInput.focus();
             });
         }
@@ -679,7 +712,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     // 11. 3D Tilt Effect for Desktop
     // ===========================================
-    const cards = document.querySelectorAll('.project-card');
+    // Skipped entirely under prefers-reduced-motion (the CSS hover lift stays)
+    const cards = prefersReducedMotion ? [] : document.querySelectorAll('.project-card');
 
     cards.forEach(card => {
         let rect = null;
@@ -690,6 +724,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // layout on every pointermove
             rect = card.getBoundingClientRect();
         });
+
+        // Wheel-scrolling while hovering moves the card — the cached box goes stale
+        window.addEventListener('scroll', () => {
+            if (rect) rect = card.getBoundingClientRect();
+        }, { passive: true });
 
         card.addEventListener('pointermove', (e) => {
             if (e.pointerType !== 'mouse' || !rect) return;
@@ -705,9 +744,11 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
         });
 
-        card.addEventListener('mouseleave', () => {
+        card.addEventListener('pointerleave', () => {
             rect = null;
-            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            // Clear rather than reset: a leftover inline transform would
+            // permanently override the CSS :hover lift on later hovers
+            card.style.transform = '';
         });
     });
 
@@ -725,7 +766,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // API data is built as DOM nodes with textContent (no innerHTML)
             const heading = document.createElement('h4');
             const link = document.createElement('a');
-            link.href = repo.html_url;
+            // Defense in depth: only ever link to github.com (blocks javascript: URLs
+            // from a tampered response or a poisoned sessionStorage cache)
+            link.href = /^https:\/\/github\.com\//.test(repo.html_url)
+                ? repo.html_url
+                : 'https://github.com/ContiHan?tab=repositories';
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
             link.textContent = repo.name;
@@ -776,7 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY));
-            if (cached && Date.now() - cached.time < CACHE_TTL) {
+            if (cached && Array.isArray(cached.repos) && Date.now() - cached.time < CACHE_TTL) {
                 renderGithubRepos(cached.repos, reposContainer);
                 return;
             }
@@ -786,6 +831,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('https://api.github.com/users/ContiHan/repos?sort=updated&per_page=3');
             if (!response.ok) throw new Error('Network response was not ok');
             const repos = await response.json();
+            // Error payloads (rate limit etc.) can arrive as objects — never cache them
+            if (!Array.isArray(repos)) throw new Error('Unexpected GitHub API payload');
 
             try {
                 sessionStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), repos }));

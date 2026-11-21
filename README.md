@@ -49,5 +49,5 @@ npm run lhci     # Lighthouse CI with performance budget
 
 ## Credits
 
-- Icons: [Font Awesome Free](https://fontawesome.com) 6.4.0 ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), bundled as an SVG sprite
+- Icons: [Font Awesome Free](https://fontawesome.com) 6.4.0 ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)) and [Feather](https://feathericons.com) sun/moon ([MIT](https://github.com/feathericons/feather/blob/main/LICENSE)), bundled as an SVG sprite
 - Fonts: [Fira Code](https://github.com/tonsky/FiraCode) & [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch) ([SIL OFL](https://openfontlicense.org/)), self-hosted
