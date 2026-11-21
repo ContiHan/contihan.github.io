@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "May the Force be with you."
     ];
 
-    const TYPE_WPM = 77;                      // target speed (study average: 52)
+    const TYPE_WPM = 81;                      // target speed (study average: 52)
     const TYPE_TEMPO = 52 / TYPE_WPM;         // timings below are calibrated at 52 WPM
     const TYPE_BASE_IKI_MS = 200;             // median keystroke interval at 52 WPM
     const TYPE_MIN_IKI_MS = 60;               // physical floor observed in the study
